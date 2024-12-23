@@ -68,7 +68,7 @@
         <div class="btn-export" onclick="Swal.fire({ title: 'Export',
         html: '<pre><code>'+JSON.stringify(editor.export(), null,4)+'</code></pre>'
         })">Export</div>
-        <div class="btn-save" onclick="saveFlow()">Save</div>
+        <div class="btn-export" onclick="saveFlow()">Save</div>
         <div class="btn-clear" onclick="editor.clearModuleSelected()">Clear</div>
         <div class="btn-lock">
           <i id="lock" class="fas fa-lock" onclick="editor.editor_mode='fixed'; changeMode('lock');"></i>
@@ -392,7 +392,7 @@
       const flowData = JSON.stringify(editor.export(), null, 4);
       const fileName = prompt("Enter a name for the flow file:");
       if (fileName) {
-        const blob = new Blob([flowData], { type: "application/json" });
+        const blob = new Blob([JSON.stringify(editor.export(), null, 4)], { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
         a.download = `flows/${fileName}.json`;
