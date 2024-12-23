@@ -105,15 +105,15 @@ cursor: pointer;
   z-index: 5;
 }
 
-.btn-import {
+.btn-clear {
   float: right;
   position: absolute;
   top: 10px;
-  right: 200px; /* Adjusted spacing for Import button */
-  color: black;
+  right: 400px; /* Adjusted spacing for Clear button */
+  color: white;
   font-weight: bold;
-  border: 1px solid #d4a017;
-  background: #ffd700;
+  border: 1px solid #96015b;
+  background: #e3195a;
   padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
@@ -124,15 +124,30 @@ cursor: pointer;
   right: 300px; /* Adjusted spacing for Save button */
 }
 
-.btn-clear {
+.btn-export {
   float: right;
   position: absolute;
   top: 10px;
-  right: 200px; /* Adjusted spacing for Clear button */
+  right: 200px; /* Adjusted spacing for Export button */
   color: white;
   font-weight: bold;
-  border: 1px solid #96015b;
-  background: #e3195a;
+  border: 1px solid #0e5ba3;
+  background: #4ea9ff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.btn-import {
+  float: right;
+  position: absolute;
+  top: 10px;
+  right: 100px; /* Adjusted spacing for Import button */
+  color: black;
+  font-weight: bold;
+  border: 1px solid #d4a017;
+  background: #ffd700;
   padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
