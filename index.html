@@ -75,6 +75,26 @@
         })">Export</div>
         <div class="btn-import" onclick="document.getElementById('file-input').click()">Import</div>
         <input type="file" id="file-input" accept=".json" style="display: none;" onchange="importFlow(event)">
+        <script>
+          function importFlow(event) {
+            const file = event.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                try {
+                  const jsonData = JSON.parse(e.target.result);
+                  editor.clearModuleSelected(); // Clear current module
+                  editor.import(jsonData); // Import the JSON data
+                  editor.changeModule('Home'); // Ensure the "Home" module is active
+                  Swal.fire('Success', 'Flow imported successfully!', 'success');
+                } catch (error) {
+                  Swal.fire('Error', 'Invalid JSON file!', 'error');
+                }
+              };
+              reader.readAsText(file);
+            }
+          }
+        </script>
         <div class="btn-lock">
           <i id="lock" class="fas fa-lock" onclick="editor.editor_mode='fixed'; changeMode('lock');"></i>
           <i id="unlock" class="fas fa-lock-open" onclick="editor.editor_mode='edit'; changeMode('unlock');" style="display:none;"></i>
