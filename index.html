@@ -77,6 +77,7 @@
       </div>
       <div id="drawflow" ondrop="drop(event)" ondragover="allowDrop(event)">
 
+        <div class="btn-import" onclick="importFlow()">Import</div>
         <div class="btn-export" onclick="Swal.fire({ title: 'Export',
         html: '<pre><code>'+JSON.stringify(editor.export(), null,4)+'</code></pre>'
         })">Export</div>

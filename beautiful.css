@@ -105,8 +105,23 @@ cursor: pointer;
   z-index: 5;
 }
 
+.btn-import {
+  float: right;
+  position: absolute;
+  top: 10px;
+  right: 200px; /* Adjusted spacing for Import button */
+  color: black;
+  font-weight: bold;
+  border: 1px solid #d4a017;
+  background: #ffd700;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 5;
+}
+
 .btn-export:nth-of-type(2) {
-  right: 110px; /* Adjusted spacing for Save button */
+  right: 300px; /* Adjusted spacing for Save button */
 }
 
 .btn-clear {
