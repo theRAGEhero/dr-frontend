@@ -30,6 +30,9 @@ class DrawflowElement extends LitElement {
     editor.reroute = true;
     editor.reroute_fix_curvature = true;
 
+    editor.reroute = true;
+    editor.reroute_fix_curvature = true;
+
     editor.start();
 
     const data = {
