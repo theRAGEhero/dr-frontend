@@ -98,8 +98,8 @@
                     Swal.fire('Error', 'Invalid JSON structure! Please ensure the file contains a valid "drawflow" object with at least one module.', 'error');
                   }
                 } catch (error) {
-                  console.error('Error parsing JSON:', error);
-                  Swal.fire('Error', 'Invalid JSON file! Please ensure the file is properly formatted.', 'error');
+                  console.error('Error parsing JSON:', error.message);
+                  Swal.fire('Error', `Invalid JSON file! Error: ${error.message}. Please ensure the file is properly formatted and contains a valid "drawflow" object.`, 'error');
                 }
               };
               reader.readAsText(file);
