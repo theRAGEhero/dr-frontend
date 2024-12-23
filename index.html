@@ -350,12 +350,21 @@
             <div>
               <div class="title-box"><i class="fas fa-user"></i> Participant</div>
               <div class="box">
-                <p>Enter participant name</p>
-                <input type="text" df-name>
+                <p>Select Participant Attribute</p>
+                <select df-participant-attribute>
+                  <option value="skill">Skill</option>
+                  <option value="scientific_field">Scientific Field</option>
+                  <option value="experience">Experience</option>
+                  <option value="sex_gender">Sex/Gender</option>
+                  <option value="proximity">Proximity</option>
+                  <option value="political_power">Political Power</option>
+                  <option value="sensitivity">Sensitivity</option>
+                  <option value="ideology">Ideology</option>
+                </select>
               </div>
             </div>
             `;
-            editor.addNode('participant', 1, 1, pos_x, pos_y, 'Participant', { "name": ''}, participant );
+            editor.addNode('participant', 1, 1, pos_x, pos_y, 'Participant', { "participant_attribute": 'skill' }, participant );
             break;
           case 'ai_agents':
             var ai_agents = `
