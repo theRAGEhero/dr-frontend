@@ -83,11 +83,16 @@
               reader.onload = function(e) {
                 try {
                   const jsonData = JSON.parse(e.target.result);
+                  const validModules = ['Home', 'Other']; // Define valid module names
+                  const moduleNames = Object.keys(jsonData.drawflow || {});
+                  const invalidModules = moduleNames.filter(name => !validModules.includes(name));
+
                   if (
                     jsonData &&
                     jsonData.drawflow &&
                     typeof jsonData.drawflow === 'object' &&
-                    Object.keys(jsonData.drawflow).length > 0 &&
+                    moduleNames.length > 0 &&
+                    invalidModules.length === 0 &&
                     jsonData.drawflow.Home
                   ) {
                     editor.clearModuleSelected(); // Clear current module
@@ -108,6 +113,10 @@
                     } else {
                       console.error('Unexpected issue with JSON structure.');
                       console.log('Check the JSON file for any structural issues.');
+                    }
+                    if (invalidModules.length > 0) {
+                      console.error('Invalid module names:', invalidModules);
+                      console.log('Valid module names are:', validModules);
                     }
                     console.log('Expected structure: {"drawflow": {"Home": {"data": { ... }}}}');
                     Swal.fire(
