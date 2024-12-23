@@ -98,10 +98,16 @@
                     console.error('Invalid JSON structure:', jsonData);
                     if (!jsonData.drawflow) {
                       console.error('Missing "drawflow" object in JSON.');
+                      console.log('Ensure the JSON file contains a "drawflow" object at the root level.');
                     } else if (!jsonData.drawflow.Home) {
                       console.error('Missing "Home" module in "drawflow" object.');
+                      console.log('Ensure the "drawflow" object contains a "Home" module with valid data.');
+                    } else if (!jsonData.drawflow.Home.data || typeof jsonData.drawflow.Home.data !== 'object') {
+                      console.error('Invalid or missing "data" in "Home" module.');
+                      console.log('Ensure the "Home" module contains a "data" object with node definitions.');
                     } else {
                       console.error('Unexpected issue with JSON structure.');
+                      console.log('Check the JSON file for any structural issues.');
                     }
                     console.log('Expected structure: {"drawflow": {"Home": {"data": { ... }}}}');
                     Swal.fire(
