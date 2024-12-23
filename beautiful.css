@@ -105,6 +105,10 @@ cursor: pointer;
   z-index: 5;
 }
 
+.btn-export:nth-of-type(2) {
+  right: 95px; /* Adjusted to prevent overlap */
+}
+
 .btn-clear {
   float: right;
   position: absolute;
