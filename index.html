@@ -362,12 +362,19 @@
             <div>
               <div class="title-box"><i class="fas fa-robot"></i> AI Agents</div>
               <div class="box">
-                <p>Enter agent details</p>
-                <input type="text" df-name>
+                <p>Select AI Agent Type</p>
+                <select df-agent-type>
+                  <option value="academic_support">Academic Support</option>
+                  <option value="bias_recognition">Bias Recognition</option>
+                  <option value="historical_agent">Historical Agent</option>
+                  <option value="emotional_support">Emotional Support</option>
+                  <option value="mediator">Mediator</option>
+                  <option value="custom_agent">Custom Agent</option>
+                </select>
               </div>
             </div>
             `;
-            editor.addNode('ai_agents', 1, 1, pos_x, pos_y, 'AI_Agents', { "name": ''}, ai_agents );
+            editor.addNode('ai_agents', 1, 1, pos_x, pos_y, 'AI_Agents', { "agent_type": 'academic_support' }, ai_agents );
             break;
           case 'gamification':
             var gamification = `
