@@ -26,12 +26,6 @@
   </header>
   <div class="wrapper">
     <div class="col">
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="slack">
-        <i class="fab fa-slack"></i><span> Slack receive message</span>
-      </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="github">
-        <i class="fab fa-github"></i><span> Github Star</span>
-      </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="discussion">
         <i class="fas fa-comments"></i><span> Discussion</span>
       </div>
@@ -55,9 +49,6 @@
       </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="conflict_resolution">
         <i class="fas fa-handshake"></i><span> Conflict Resolution</span>
-      </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="template">
-        <i class="fas fa-code"></i><span> Template</span>
       </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="multiple">
         <i class="fas fa-code-branch"></i><span> Multiple inputs/outputs</span>
@@ -249,26 +240,6 @@
 
 
       switch (name) {
-        case 'slack':
-          var slackchat = `
-          <div>
-            <div class="title-box"><i class="fab fa-slack"></i> Slack chat message</div>
-          </div>
-          `
-          editor.addNode('slack', 1, 0, pos_x, pos_y, 'slack', {}, slackchat );
-          break;
-        case 'github':
-          var githubtemplate = `
-          <div>
-            <div class="title-box"><i class="fab fa-github "></i> Github Stars</div>
-            <div class="box">
-              <p>Enter repository url</p>
-            <input type="text" df-name>
-            </div>
-          </div>
-          `;
-          editor.addNode('github', 0, 1, pos_x, pos_y, 'github', { "name": ''}, githubtemplate );
-          break;
         case 'discussion':
           var discussiontemplate = `
           <div>
@@ -363,19 +334,6 @@
             editor.addNode('conflict_resolution', 1, 1, pos_x, pos_y, 'conflict_resolution', { "name": ''}, conflict_resolution );
             break;
 
-          case 'template':
-            var template = `
-            <div>
-              <div class="title-box"><i class="fas fa-code"></i> Template</div>
-              <div class="box">
-                Ger Vars
-                <textarea df-template></textarea>
-                Output template with vars
-              </div>
-            </div>
-            `;
-            editor.addNode('template', 1, 1, pos_x, pos_y, 'template', { "template": 'Write your template'}, template );
-            break;
           case 'multiple':
             var multiple = `
             <div>
