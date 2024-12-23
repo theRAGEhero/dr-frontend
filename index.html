@@ -371,10 +371,12 @@
                   <option value="sensitivity">Sensitivity</option>
                   <option value="ideology">Ideology</option>
                 </select>
+              <p>Info</p>
+              <textarea df-participant-info placeholder="Enter additional information"></textarea>
               </div>
             </div>
             `;
-            editor.addNode('participant', 1, 1, pos_x, pos_y, 'Participant', { "participant_attribute": 'skill' }, participant );
+            editor.addNode('participant', 1, 1, pos_x, pos_y, 'Participant', { "participant_attribute": 'skill', "info": '' }, participant );
             break;
           case 'ai_agents':
             var ai_agents = `
@@ -390,10 +392,12 @@
                   <option value="mediator">Mediator</option>
                   <option value="custom_agent">Custom Agent</option>
                 </select>
+              <p>Info</p>
+              <textarea df-agent-info placeholder="Enter additional information"></textarea>
               </div>
             </div>
             `;
-            editor.addNode('ai_agents', 1, 1, pos_x, pos_y, 'AI_Agents', { "agent_type": 'academic_support' }, ai_agents );
+            editor.addNode('ai_agents', 1, 1, pos_x, pos_y, 'AI_Agents', { "agent_type": 'academic_support', "info": '' }, ai_agents );
             break;
           case 'gamification':
             var gamification = `
@@ -402,18 +406,27 @@
               <div class="box">
                 <p>Enter gamification details</p>
                 <input type="text" df-name>
+              <p>Info</p>
+              <textarea df-gamification-info placeholder="Enter additional information"></textarea>
               </div>
             </div>
             `;
-            editor.addNode('gamification', 1, 1, pos_x, pos_y, 'Gamification', { "name": ''}, gamification );
+            editor.addNode('gamification', 1, 1, pos_x, pos_y, 'Gamification', { "name": '', "info": '' }, gamification );
             break;
           case 'conflict_resolution':
             var conflict_resolution = `
             <div>
               <div class="title-box"><i class="fas fa-handshake"></i> Conflict Resolution</div>
               <div class="box">
-                <p>Enter resolution details</p>
-                <input type="text" df-name>
+                <p>Select Conflict Resolution Method</p>
+                <select df-conflict-method>
+                  <option value="conversational_game_theory">Conversational Game Theory</option>
+                  <option value="mediation">Mediation</option>
+                  <option value="negotiation">Negotiation</option>
+                  <option value="arbitration">Arbitration</option>
+                </select>
+                <p>Info</p>
+                <textarea df-conflict-info placeholder="Enter additional information"></textarea>
               </div>
             </div>
             `;
