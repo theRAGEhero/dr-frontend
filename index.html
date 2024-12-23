@@ -83,15 +83,15 @@
               reader.onload = function(e) {
                 try {
                   const jsonData = JSON.parse(e.target.result);
-                  if (jsonData.drawflow && typeof jsonData.drawflow === 'object') {
+                  if (jsonData && jsonData.drawflow && typeof jsonData.drawflow === 'object') {
                     editor.clearModuleSelected(); // Clear current module
                     editor.import(jsonData); // Import the JSON data
                     editor.changeModule('Home'); // Ensure the "Home" module is active
                     Swal.fire('Success', 'Flow imported successfully!', 'success');
                   } else {
-                    throw new Error('Invalid JSON structure');
+                    console.error('Invalid JSON structure:', jsonData);
+                    Swal.fire('Error', 'Invalid JSON structure! Please ensure the file contains a valid "drawflow" object.', 'error');
                   }
-                  Swal.fire('Success', 'Flow imported successfully!', 'success');
                 } catch (error) {
                   Swal.fire('Error', 'Invalid JSON file!', 'error');
                 }
