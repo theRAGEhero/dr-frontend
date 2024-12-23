@@ -32,9 +32,6 @@
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="decision">
         <i class="fas fa-balance-scale"></i><span> Decision</span>
       </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="google">
-        <i class="fab fa-google-drive"></i><span> Google Drive save</span>
-      </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="email">
         <i class="fas fa-at"></i><span> Email send</span>
       </div>
@@ -50,11 +47,8 @@
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="conflict_resolution">
         <i class="fas fa-handshake"></i><span> Conflict Resolution</span>
       </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="multiple">
-        <i class="fas fa-code-branch"></i><span> Multiple inputs/outputs</span>
-      </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="personalized">
-        <i class="fas fa-fill"></i><span> Personalized</span>
+      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="custom">
+        <i class="fas fa-cogs"></i><span> Custom</span>
       </div>
 
 
@@ -71,7 +65,7 @@
         <div class="btn-clear" onclick="editor.clearModuleSelected()">Clear</div>
         <div class="btn-export" onclick="saveFlow()">Save</div>
         <div class="btn-export" onclick="Swal.fire({ title: 'Export',
-        html: '<pre><code>'+JSON.stringify(editor.export(), null,4)+'</code></pre>'
+        html: '<pre><code>'+JSON.stringify(editor.export(), null, 4)+'</code></pre>'
         })">Export</div>
         <div class="btn-import" onclick="document.getElementById('file-input').click()">Import</div>
         <input type="file" id="file-input" accept=".json" style="display: none;" onchange="importFlow(event)">
@@ -151,9 +145,7 @@
     var id = document.getElementById("drawflow");
     const editor = new Drawflow(id);
     editor.reroute = true;
-    const dataToImport = {"drawflow":{"NewModule":{"data":{"1":{"id":1,"name":"newnode","data":{},"class":"newnode","html":"\n    <div>\n      <div class=\"title-box\">🎉 New Node</div>\n      <div class=\"box\">\n        <p>Custom content for the new module.</p>\n      </div>\n    </div>\n    ","typenode": false, "inputs":{},"outputs":{},"pos_x":100,"pos_y":100}}}}}
     editor.start();
-    editor.import(dataToImport);
 
 
   /*
@@ -305,8 +297,14 @@
           <div>
             <div class="title-box"><i class="fas fa-comments"></i> Discussion</div>
             <div class="box">
-              <p>Enter discussion topic</p>
-            <input type="text" df-name>
+              <p>Select Discussion Type</p>
+              <select df-discussion-type>
+                <option value="in_real_life">In Real Life</option>
+                <option value="round_discussion">Round Discussion</option>
+                <option value="non_violent_communication">Non Violent Communication</option>
+              </select>
+              <p>Info</p>
+              <textarea df-discussion-info placeholder="Enter additional information"></textarea>
             </div>
           </div>
           `;
@@ -320,23 +318,19 @@
               <p>Make a decision</p>
               <p>select option</p>
               <select df-decision>
-                <option value="option_1">Option 1</option>
-                <option value="option_2">Option 2</option>
-                <option value="option_3">Option 3</option>
+                <option value="by_majority">By Majority</option>
+                <option value="consensus">Consensus</option>
+                <option value="at_least_x_percent">At least x%</option>
+                <option value="authocracy">Authocracy</option>
+                <option value="delegating">Delegating</option>
               </select>
+              <p>Info</p>
+              <textarea df-decision-info placeholder="Enter additional information"></textarea>
             </div>
           </div>
           `;
           editor.addNode('decision', 1, 1, pos_x, pos_y, 'Decision', { "decision": 'option_1'}, decision );
           break;
-          case 'google':
-            var google = `
-            <div>
-              <div class="title-box"><i class="fab fa-google-drive"></i> Google Drive save </div>
-            </div>
-            `;
-            editor.addNode('google', 1, 0, pos_x, pos_y, 'Google', {}, google );
-            break;
           case 'email':
             var email = `
             <div>
@@ -350,24 +344,44 @@
             <div>
               <div class="title-box"><i class="fas fa-user"></i> Participant</div>
               <div class="box">
-                <p>Enter participant name</p>
-                <input type="text" df-name>
+                <p>Select Participant Attribute</p>
+                <select df-participant-attribute>
+                  <option value="skill">Skill</option>
+                  <option value="scientific_field">Scientific Field</option>
+                  <option value="experience">Experience</option>
+                  <option value="sex_gender">Sex/Gender</option>
+                  <option value="proximity">Proximity</option>
+                  <option value="political_power">Political Power</option>
+                  <option value="sensitivity">Sensitivity</option>
+                  <option value="ideology">Ideology</option>
+                </select>
+              <p>Info</p>
+              <textarea df-participant-info placeholder="Enter additional information"></textarea>
               </div>
             </div>
             `;
-            editor.addNode('participant', 1, 1, pos_x, pos_y, 'Participant', { "name": ''}, participant );
+            editor.addNode('participant', 1, 1, pos_x, pos_y, 'Participant', { "participant_attribute": 'skill', "info": '' }, participant );
             break;
           case 'ai_agents':
             var ai_agents = `
             <div>
               <div class="title-box"><i class="fas fa-robot"></i> AI Agents</div>
               <div class="box">
-                <p>Enter agent details</p>
-                <input type="text" df-name>
+                <p>Select AI Agent Type</p>
+                <select df-agent-type>
+                  <option value="academic_support">Academic Support</option>
+                  <option value="bias_recognition">Bias Recognition</option>
+                  <option value="historical_agent">Historical Agent</option>
+                  <option value="emotional_support">Emotional Support</option>
+                  <option value="mediator">Mediator</option>
+                  <option value="custom_agent">Custom Agent</option>
+                </select>
+              <p>Info</p>
+              <textarea df-agent-info placeholder="Enter additional information"></textarea>
               </div>
             </div>
             `;
-            editor.addNode('ai_agents', 1, 1, pos_x, pos_y, 'AI_Agents', { "name": ''}, ai_agents );
+            editor.addNode('ai_agents', 1, 1, pos_x, pos_y, 'AI_Agents', { "agent_type": 'academic_support', "info": '' }, ai_agents );
             break;
           case 'gamification':
             var gamification = `
@@ -376,43 +390,48 @@
               <div class="box">
                 <p>Enter gamification details</p>
                 <input type="text" df-name>
+              <p>Info</p>
+              <textarea df-gamification-info placeholder="Enter additional information"></textarea>
               </div>
             </div>
             `;
-            editor.addNode('gamification', 1, 1, pos_x, pos_y, 'Gamification', { "name": ''}, gamification );
+            editor.addNode('gamification', 1, 1, pos_x, pos_y, 'Gamification', { "name": '', "info": '' }, gamification );
             break;
           case 'conflict_resolution':
             var conflict_resolution = `
             <div>
               <div class="title-box"><i class="fas fa-handshake"></i> Conflict Resolution</div>
               <div class="box">
-                <p>Enter resolution details</p>
-                <input type="text" df-name>
+                <p>Select Conflict Resolution Method</p>
+                <select df-conflict-method>
+                  <option value="conversational_game_theory">Conversational Game Theory</option>
+                  <option value="mediation">Mediation</option>
+                  <option value="negotiation">Negotiation</option>
+                  <option value="arbitration">Arbitration</option>
+                </select>
+                <p>Info</p>
+                <textarea df-conflict-info placeholder="Enter additional information"></textarea>
               </div>
             </div>
             `;
             editor.addNode('conflict_resolution', 1, 1, pos_x, pos_y, 'Conflict_Resolution', { "name": ''}, conflict_resolution );
             break;
 
-          case 'multiple':
-            var multiple = `
+
+          case 'custom':
+            var custom = `
             <div>
+              <div class="title-box"><i class="fas fa-cogs"></i> Custom</div>
               <div class="box">
-                Multiple!
+                <p>Enter custom details</p>
+                <input type="text" df-custom-name placeholder="Custom Name">
+                <p>Info</p>
+                <textarea df-custom-info placeholder="Enter additional information"></textarea>
               </div>
             </div>
             `;
-            editor.addNode('multiple', 3, 4, pos_x, pos_y, 'Multiple', {}, multiple );
+            editor.addNode('custom', 1, 1, pos_x, pos_y, 'Custom', { "name": '', "info": '' }, custom );
             break;
-          case 'personalized':
-            var personalized = `
-            <div>
-              Personalized
-            </div>
-            `;
-            editor.addNode('personalized', 1, 1, pos_x, pos_y, 'Personalized', {}, personalized );
-            break;
-
         default:
       }
     }
