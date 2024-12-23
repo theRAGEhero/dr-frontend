@@ -34,6 +34,9 @@
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="github">
         <i class="fab fa-github"></i><span> Github Star</span>
       </div>
+      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="discussion">
+        <i class="fas fa-comments"></i><span> Discussion</span>
+      </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="telegram">
         <i class="fab fa-telegram"></i><span> Telegram send message</span>
       </div>
@@ -270,6 +273,18 @@
           </div>
           `;
           editor.addNode('github', 0, 1, pos_x, pos_y, 'github', { "name": ''}, githubtemplate );
+          break;
+        case 'discussion':
+          var discussiontemplate = `
+          <div>
+            <div class="title-box"><i class="fas fa-comments"></i> Discussion</div>
+            <div class="box">
+              <p>Enter discussion topic</p>
+            <input type="text" df-name>
+            </div>
+          </div>
+          `;
+          editor.addNode('discussion', 0, 1, pos_x, pos_y, 'discussion', { "name": ''}, discussiontemplate );
           break;
         case 'telegram':
           var telegrambot = `
