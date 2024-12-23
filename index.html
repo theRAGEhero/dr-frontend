@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Drawflow Drag and Drop Interface</title>
+    <title>Drawflow Demo</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jerosoler/Drawflow/dist/drawflow.min.css">
     <style>
         body {
@@ -15,6 +15,12 @@
             height: 100vh;
             background: #f4f4f4;
         }
+        #node-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
         .drag-node {
             background: #3498db;
             color: white;
@@ -22,15 +28,35 @@
             margin: 10px;
             cursor: move;
             display: inline-block;
+            border-radius: 5px;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+        }
+        #controls button {
+            margin: 5px;
+            padding: 5px 10px;
         }
     </style>
 </head>
 <body>
     <div id="node-container">
-        <div class="drag-node" draggable="true" data-node="input">Input Node</div>
-        <div class="drag-node" draggable="true" data-node="process">Process Node</div>
-        <div class="drag-node" draggable="true" data-node="output">Output Node</div>
+        <div class="drag-node" draggable="true" data-node="slack">Slack Message</div>
+        <div class="drag-node" draggable="true" data-node="telegram">Telegram Bot</div>
+        <div class="drag-node" draggable="true" data-node="email">Send Email</div>
+        <div class="drag-node" draggable="true" data-node="github">Github Stars</div>
+        <div class="drag-node" draggable="true" data-node="facebook">Facebook Message</div>
+        <div class="drag-node" draggable="true" data-node="log">Save Log File</div>
     </div>
+    
+    <div id="controls">
+        <button onclick="exportFlow()">Export</button>
+        <button onclick="clearFlow()">Clear</button>
+    </div>
+
     <div id="drawflow"></div>
 
     <script src="https://cdn.jsdelivr.net/gh/jerosoler/Drawflow/dist/drawflow.min.js"></script>

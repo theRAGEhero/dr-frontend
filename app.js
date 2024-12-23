@@ -1,6 +1,8 @@
+let editor;
+
 document.addEventListener('DOMContentLoaded', function() {
     var id = document.getElementById("drawflow");
-    const editor = new Drawflow(id);
+    editor = new Drawflow(id);
     editor.start();
 
     // Enable drag and drop of nodes
@@ -25,19 +27,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Add node based on type
         switch(nodeType) {
-            case 'input':
-                editor.addNode('input', 0, 1, x, y, 'input-node', {}, 'Input Node');
+            case 'slack':
+                editor.addNode('slack', 1, 1, x, y, 'slack-node', {
+                    channel: 'Select Channel'
+                }, 'Slack Chat Message');
                 break;
-            case 'process':
-                editor.addNode('process', 1, 1, x, y, 'process-node', {}, 'Process Node');
+            case 'telegram':
+                editor.addNode('telegram', 1, 1, x, y, 'telegram-node', {
+                    bot: 'Select Bot'
+                }, 'Telegram Bot');
                 break;
-            case 'output':
-                editor.addNode('output', 1, 0, x, y, 'output-node', {}, 'Output Node');
+            case 'email':
+                editor.addNode('email', 1, 1, x, y, 'email-node', {
+                    template: 'Email Template'
+                }, 'Send Email');
+                break;
+            case 'github':
+                editor.addNode('github', 1, 1, x, y, 'github-node', {
+                    repo: 'Enter Repository URL'
+                }, 'Github Stars');
+                break;
+            case 'facebook':
+                editor.addNode('facebook', 1, 1, x, y, 'facebook-node', {}, 'Facebook Message');
+                break;
+            case 'log':
+                editor.addNode('log', 1, 0, x, y, 'log-node', {}, 'Save Log File');
                 break;
         }
     });
 
-    // Optional: Add some events
+    // Events
     editor.on('nodeCreated', function(id) {
         console.log("Node created: " + id);
     });
@@ -45,4 +64,22 @@ document.addEventListener('DOMContentLoaded', function() {
     editor.on('connectionCreated', function(connection) {
         console.log("Connection created", connection);
     });
+});
+
+function exportFlow() {
+    var exportData = editor.export();
+    console.log('Exported Flow:', exportData);
+    alert('Flow exported to console. Check browser developer tools.');
+}
+
+function clearFlow() {
+    editor.clear();
+}
+
+// Optional: Add keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Delete selected node with Delete key
+    if (e.key === 'Delete') {
+        editor.removeNodeSelected();
+    }
 });
