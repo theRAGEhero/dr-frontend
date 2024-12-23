@@ -73,7 +73,8 @@
         <div class="btn-export" onclick="Swal.fire({ title: 'Export',
         html: '<pre><code>'+JSON.stringify(editor.export(), null,4)+'</code></pre>'
         })">Export</div>
-        <div class="btn-import" onclick="importFlow()">Import</div>
+        <div class="btn-import" onclick="document.getElementById('file-input').click()">Import</div>
+        <input type="file" id="file-input" accept=".json" style="display: none;" onchange="importFlow(event)">
         <div class="btn-lock">
           <i id="lock" class="fas fa-lock" onclick="editor.editor_mode='fixed'; changeMode('lock');"></i>
           <i id="unlock" class="fas fa-lock-open" onclick="editor.editor_mode='edit'; changeMode('unlock');" style="display:none;"></i>
