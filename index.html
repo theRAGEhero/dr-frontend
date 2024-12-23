@@ -53,12 +53,6 @@
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="custom">
         <i class="fas fa-cogs"></i><span> Custom</span>
       </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="multiple">
-        <i class="fas fa-code-branch"></i><span> Multiple inputs/outputs</span>
-      </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="personalized">
-        <i class="fas fa-fill"></i><span> Personalized</span>
-      </div>
 
 
     </div>
@@ -436,24 +430,6 @@
             editor.addNode('conflict_resolution', 1, 1, pos_x, pos_y, 'Conflict_Resolution', { "name": ''}, conflict_resolution );
             break;
 
-          case 'multiple':
-            var multiple = `
-            <div>
-              <div class="box">
-                Multiple!
-              </div>
-            </div>
-            `;
-            editor.addNode('multiple', 3, 4, pos_x, pos_y, 'Multiple', {}, multiple );
-            break;
-          case 'personalized':
-            var personalized = `
-            <div>
-              Personalized
-            </div>
-            `;
-            editor.addNode('personalized', 1, 1, pos_x, pos_y, 'Personalized', {}, personalized );
-            break;
 
           case 'custom':
             var custom = `
