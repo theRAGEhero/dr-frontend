@@ -68,9 +68,7 @@
         </ul>
       </div>
       <div id="drawflow">
-        <div class="btn-export" onclick="Swal.fire({ title: 'Export',
-        html: '<pre><code>'+JSON.stringify(editor.export(), null,4)+'</code></pre>'
-        })">Export</div>
+        <div class="btn-export" onclick="exportFlow()">Export</div>
         <div class="btn-clear" onclick="editor.clearModuleSelected()">Clear</div>
         <div class="btn-lock">
           <i id="lock" class="fas fa-lock" onclick="editor.editor_mode='fixed'; changeMode('lock');"></i>
@@ -85,6 +83,6 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="drawflow-element.js"></script>
 </body>
 </html>

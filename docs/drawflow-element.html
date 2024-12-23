@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Drawflow Custom Element</title>
+    <script src="https://cdn.jsdelivr.net/npm/drawflow@0.0.48/dist/drawflow.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drawflow@0.0.48/dist/drawflow.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #drawflow {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="drawflow"></div>
+    <script>
+        var id = document.getElementById("drawflow");
+        var editor = new Drawflow(id);
+        editor.start();
+
+        // Example of adding a node
+        editor.addNode('hello', 1, 1, 100, 100, 'hello', {}, '<div>Hello World!</div>');
+    </script>
+</body>
+</html>
