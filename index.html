@@ -32,9 +32,6 @@
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="decision">
         <i class="fas fa-balance-scale"></i><span> Decision</span>
       </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="google">
-        <i class="fab fa-google-drive"></i><span> Google Drive save</span>
-      </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="email">
         <i class="fas fa-at"></i><span> Email send</span>
       </div>
@@ -336,14 +333,6 @@
           `;
           editor.addNode('decision', 1, 1, pos_x, pos_y, 'Decision', { "decision": 'option_1'}, decision );
           break;
-          case 'google':
-            var google = `
-            <div>
-              <div class="title-box"><i class="fab fa-google-drive"></i> Google Drive save </div>
-            </div>
-            `;
-            editor.addNode('google', 1, 0, pos_x, pos_y, 'Google', {}, google );
-            break;
           case 'email':
             var email = `
             <div>
