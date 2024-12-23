@@ -44,6 +44,18 @@
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="email">
         <i class="fas fa-at"></i><span> Email send</span>
       </div>
+      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="participant">
+        <i class="fas fa-user"></i><span> Participant</span>
+      </div>
+      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="ai_agents">
+        <i class="fas fa-robot"></i><span> AI Agents</span>
+      </div>
+      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="gamification">
+        <i class="fas fa-gamepad"></i><span> Gamification</span>
+      </div>
+      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="conflict_resolution">
+        <i class="fas fa-handshake"></i><span> Conflict Resolution</span>
+      </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="template">
         <i class="fas fa-code"></i><span> Template</span>
       </div>
@@ -300,6 +312,54 @@
             </div>
             `;
             editor.addNode('email', 1, 0, pos_x, pos_y, 'email', {}, email );
+            break;
+          case 'participant':
+            var participant = `
+            <div>
+              <div class="title-box"><i class="fas fa-user"></i> Participant</div>
+              <div class="box">
+                <p>Enter participant name</p>
+                <input type="text" df-name>
+              </div>
+            </div>
+            `;
+            editor.addNode('participant', 1, 1, pos_x, pos_y, 'participant', { "name": ''}, participant );
+            break;
+          case 'ai_agents':
+            var ai_agents = `
+            <div>
+              <div class="title-box"><i class="fas fa-robot"></i> AI Agents</div>
+              <div class="box">
+                <p>Enter agent details</p>
+                <input type="text" df-name>
+              </div>
+            </div>
+            `;
+            editor.addNode('ai_agents', 1, 1, pos_x, pos_y, 'ai_agents', { "name": ''}, ai_agents );
+            break;
+          case 'gamification':
+            var gamification = `
+            <div>
+              <div class="title-box"><i class="fas fa-gamepad"></i> Gamification</div>
+              <div class="box">
+                <p>Enter gamification details</p>
+                <input type="text" df-name>
+              </div>
+            </div>
+            `;
+            editor.addNode('gamification', 1, 1, pos_x, pos_y, 'gamification', { "name": ''}, gamification );
+            break;
+          case 'conflict_resolution':
+            var conflict_resolution = `
+            <div>
+              <div class="title-box"><i class="fas fa-handshake"></i> Conflict Resolution</div>
+              <div class="box">
+                <p>Enter resolution details</p>
+                <input type="text" df-name>
+              </div>
+            </div>
+            `;
+            editor.addNode('conflict_resolution', 1, 1, pos_x, pos_y, 'conflict_resolution', { "name": ''}, conflict_resolution );
             break;
 
           case 'template':
