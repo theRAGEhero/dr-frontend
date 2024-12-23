@@ -310,7 +310,7 @@
             </div>
           </div>
           `;
-          editor.addNode('discussion', 1, 1, pos_x, pos_y, 'discussion', { "name": ''}, discussiontemplate );
+          editor.addNode('discussion', 1, 1, pos_x, pos_y, 'Discussion', { "name": ''}, discussiontemplate );
           break;
         case 'decision':
           var decision = `
@@ -327,7 +327,7 @@
             </div>
           </div>
           `;
-          editor.addNode('decision', 1, 1, pos_x, pos_y, 'decision', { "decision": 'option_1'}, decision );
+          editor.addNode('decision', 1, 1, pos_x, pos_y, 'Decision', { "decision": 'option_1'}, decision );
           break;
           case 'google':
             var google = `
@@ -335,7 +335,7 @@
               <div class="title-box"><i class="fab fa-google-drive"></i> Google Drive save </div>
             </div>
             `;
-            editor.addNode('google', 1, 0, pos_x, pos_y, 'google', {}, google );
+            editor.addNode('google', 1, 0, pos_x, pos_y, 'Google', {}, google );
             break;
           case 'email':
             var email = `
@@ -343,7 +343,7 @@
               <div class="title-box"><i class="fas fa-at"></i> Send Email </div>
             </div>
             `;
-            editor.addNode('email', 1, 0, pos_x, pos_y, 'email', {}, email );
+            editor.addNode('email', 1, 0, pos_x, pos_y, 'Email', {}, email );
             break;
           case 'participant':
             var participant = `
@@ -355,7 +355,7 @@
               </div>
             </div>
             `;
-            editor.addNode('participant', 1, 1, pos_x, pos_y, 'participant', { "name": ''}, participant );
+            editor.addNode('participant', 1, 1, pos_x, pos_y, 'Participant', { "name": ''}, participant );
             break;
           case 'ai_agents':
             var ai_agents = `
@@ -367,7 +367,7 @@
               </div>
             </div>
             `;
-            editor.addNode('ai_agents', 1, 1, pos_x, pos_y, 'ai_agents', { "name": ''}, ai_agents );
+            editor.addNode('ai_agents', 1, 1, pos_x, pos_y, 'AI_Agents', { "name": ''}, ai_agents );
             break;
           case 'gamification':
             var gamification = `
@@ -379,7 +379,7 @@
               </div>
             </div>
             `;
-            editor.addNode('gamification', 1, 1, pos_x, pos_y, 'gamification', { "name": ''}, gamification );
+            editor.addNode('gamification', 1, 1, pos_x, pos_y, 'Gamification', { "name": ''}, gamification );
             break;
           case 'conflict_resolution':
             var conflict_resolution = `
@@ -391,7 +391,7 @@
               </div>
             </div>
             `;
-            editor.addNode('conflict_resolution', 1, 1, pos_x, pos_y, 'conflict_resolution', { "name": ''}, conflict_resolution );
+            editor.addNode('conflict_resolution', 1, 1, pos_x, pos_y, 'Conflict_Resolution', { "name": ''}, conflict_resolution );
             break;
 
           case 'multiple':
@@ -402,7 +402,7 @@
               </div>
             </div>
             `;
-            editor.addNode('multiple', 3, 4, pos_x, pos_y, 'multiple', {}, multiple );
+            editor.addNode('multiple', 3, 4, pos_x, pos_y, 'Multiple', {}, multiple );
             break;
           case 'personalized':
             var personalized = `
@@ -410,7 +410,7 @@
               Personalized
             </div>
             `;
-            editor.addNode('personalized', 1, 1, pos_x, pos_y, 'personalized', {}, personalized );
+            editor.addNode('personalized', 1, 1, pos_x, pos_y, 'Personalized', {}, personalized );
             break;
 
         default:
