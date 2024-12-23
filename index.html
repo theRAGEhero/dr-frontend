@@ -25,9 +25,6 @@
   </header>
   <div class="wrapper">
     <div class="col">
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="facebook">
-        <i class="fab fa-facebook"></i><span> Facebook</span>
-      </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="slack">
         <i class="fab fa-slack"></i><span> Slack receive message</span>
       </div>
@@ -37,17 +34,8 @@
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="discussion">
         <i class="fas fa-comments"></i><span> Discussion</span>
       </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="telegram">
-        <i class="fab fa-telegram"></i><span> Telegram send message</span>
-      </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="decision">
         <i class="fas fa-balance-scale"></i><span> Decision</span>
-      </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="aws">
-        <i class="fab fa-aws"></i><span> AWS</span>
-      </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="log">
-        <i class="fas fa-file-signature"></i><span> File Log</span>
       </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="google">
         <i class="fab fa-google-drive"></i><span> Google Drive save</span>
@@ -246,14 +234,6 @@
 
 
       switch (name) {
-        case 'facebook':
-        var facebook = `
-        <div>
-          <div class="title-box"><i class="fab fa-facebook"></i> Facebook Message</div>
-        </div>
-        `;
-          editor.addNode('facebook', 0,  1, pos_x, pos_y, 'facebook', {}, facebook );
-          break;
         case 'slack':
           var slackchat = `
           <div>
@@ -286,24 +266,6 @@
           `;
           editor.addNode('discussion', 0, 1, pos_x, pos_y, 'discussion', { "name": ''}, discussiontemplate );
           break;
-        case 'telegram':
-          var telegrambot = `
-          <div>
-            <div class="title-box"><i class="fab fa-telegram-plane"></i> Telegram bot</div>
-            <div class="box">
-              <p>Send to telegram</p>
-              <p>select channel</p>
-              <select df-channel>
-                <option value="channel_1">Channel 1</option>
-                <option value="channel_2">Channel 2</option>
-                <option value="channel_3">Channel 3</option>
-                <option value="channel_4">Channel 4</option>
-              </select>
-            </div>
-          </div>
-          `;
-          editor.addNode('telegram', 1, 0, pos_x, pos_y, 'telegram', { "channel": 'channel_3'}, telegrambot );
-          break;
         case 'decision':
           var decision = `
           <div>
@@ -321,28 +283,6 @@
           `;
           editor.addNode('decision', 1, 0, pos_x, pos_y, 'decision', { "decision": 'option_1'}, decision );
           break;
-        case 'aws':
-          var aws = `
-          <div>
-            <div class="title-box"><i class="fab fa-aws"></i> Aws Save </div>
-            <div class="box">
-              <p>Save in aws</p>
-              <input type="text" df-db-dbname placeholder="DB name"><br><br>
-              <input type="text" df-db-key placeholder="DB key">
-              <p>Output Log</p>
-            </div>
-          </div>
-          `;
-          editor.addNode('aws', 1, 1, pos_x, pos_y, 'aws', { "db": { "dbname": '', "key": '' }}, aws );
-          break;
-        case 'log':
-            var log = `
-            <div>
-              <div class="title-box"><i class="fas fa-file-signature"></i> Save log file </div>
-            </div>
-            `;
-            editor.addNode('log', 1, 0, pos_x, pos_y, 'log', {}, log );
-            break;
           case 'google':
             var google = `
             <div>
