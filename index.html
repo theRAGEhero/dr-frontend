@@ -265,7 +265,7 @@
             </div>
           </div>
           `;
-          editor.addNode('discussion', 0, 1, pos_x, pos_y, 'discussion', { "name": ''}, discussiontemplate );
+          editor.addNode('discussion', 1, 1, pos_x, pos_y, 'discussion', { "name": ''}, discussiontemplate );
           break;
         case 'decision':
           var decision = `
@@ -282,7 +282,7 @@
             </div>
           </div>
           `;
-          editor.addNode('decision', 1, 0, pos_x, pos_y, 'decision', { "decision": 'option_1'}, decision );
+          editor.addNode('decision', 1, 1, pos_x, pos_y, 'decision', { "decision": 'option_1'}, decision );
           break;
           case 'google':
             var google = `
