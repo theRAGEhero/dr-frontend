@@ -50,6 +50,9 @@
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="conflict_resolution">
         <i class="fas fa-handshake"></i><span> Conflict Resolution</span>
       </div>
+      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="custom">
+        <i class="fas fa-cogs"></i><span> Custom</span>
+      </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="multiple">
         <i class="fas fa-code-branch"></i><span> Multiple inputs/outputs</span>
       </div>
@@ -452,6 +455,20 @@
             editor.addNode('personalized', 1, 1, pos_x, pos_y, 'Personalized', {}, personalized );
             break;
 
+          case 'custom':
+            var custom = `
+            <div>
+              <div class="title-box"><i class="fas fa-cogs"></i> Custom</div>
+              <div class="box">
+                <p>Enter custom details</p>
+                <input type="text" df-custom-name placeholder="Custom Name">
+                <p>Info</p>
+                <textarea df-custom-info placeholder="Enter additional information"></textarea>
+              </div>
+            </div>
+            `;
+            editor.addNode('custom', 1, 1, pos_x, pos_y, 'Custom', { "name": '', "info": '' }, custom );
+            break;
         default:
       }
     }
