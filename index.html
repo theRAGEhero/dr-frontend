@@ -83,9 +83,14 @@
               reader.onload = function(e) {
                 try {
                   const jsonData = JSON.parse(e.target.result);
-                  editor.clearModuleSelected(); // Clear current module
-                  editor.import(jsonData); // Import the JSON data
-                  editor.changeModule('Home'); // Ensure the "Home" module is active
+                  if (jsonData.drawflow && typeof jsonData.drawflow === 'object') {
+                    editor.clearModuleSelected(); // Clear current module
+                    editor.import(jsonData); // Import the JSON data
+                    editor.changeModule('Home'); // Ensure the "Home" module is active
+                    Swal.fire('Success', 'Flow imported successfully!', 'success');
+                  } else {
+                    throw new Error('Invalid JSON structure');
+                  }
                   Swal.fire('Success', 'Flow imported successfully!', 'success');
                 } catch (error) {
                   Swal.fire('Error', 'Invalid JSON file!', 'error');
