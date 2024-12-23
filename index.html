@@ -96,7 +96,12 @@
                     Swal.fire('Success', 'Flow imported successfully!', 'success');
                   } else {
                     console.error('Invalid JSON structure:', jsonData);
-                    Swal.fire('Error', 'Invalid JSON structure! Please ensure the file contains a valid "drawflow" object with a "Home" module.', 'error');
+                    console.log('Expected structure: {"drawflow": {"Home": {"data": { ... }}}}');
+                    Swal.fire(
+                      'Error',
+                      'Invalid JSON structure! Please ensure the file contains a valid "drawflow" object with a "Home" module. Check the console for the expected structure.',
+                      'error'
+                    );
                   }
                 } catch (error) {
                   console.error('Error parsing JSON:', error.message);
