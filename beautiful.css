@@ -280,6 +280,10 @@ cursor: pointer;
   border-radius: 4px;
 }
 
+.drawflow-node.discussion .title-box {
+  border-radius: 4px;
+}
+
 .drawflow-node input, .drawflow-node select, .drawflow-node textarea {
   border-radius: 4px;
   border: 1px solid var(--border-color);
