@@ -19,7 +19,7 @@
 
 
   <header>
-    <h2>Drawflow</h2>
+    <h2>Democracy Routes</h2>
     <div class="github-link"><a href="https://github.com/jerosoler/Drawflow" target="_blank"><i class="fab fa-github fa-3x"></i></a></div>
     <div class="them-edit-link"><a href="https://jerosoler.github.io/drawflow-theme-generator/" target="_blank">🎨</a></div>
   </header>
@@ -39,6 +39,9 @@
       </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="telegram">
         <i class="fab fa-telegram"></i><span> Telegram send message</span>
+      </div>
+      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="decision">
+        <i class="fas fa-balance-scale"></i><span> Decision</span>
       </div>
       <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="aws">
         <i class="fab fa-aws"></i><span> AWS</span>
@@ -303,6 +306,23 @@
           </div>
           `;
           editor.addNode('telegram', 1, 0, pos_x, pos_y, 'telegram', { "channel": 'channel_3'}, telegrambot );
+          break;
+        case 'decision':
+          var decision = `
+          <div>
+            <div class="title-box"><i class="fas fa-balance-scale"></i> Decision</div>
+            <div class="box">
+              <p>Make a decision</p>
+              <p>select option</p>
+              <select df-decision>
+                <option value="option_1">Option 1</option>
+                <option value="option_2">Option 2</option>
+                <option value="option_3">Option 3</option>
+              </select>
+            </div>
+          </div>
+          `;
+          editor.addNode('decision', 1, 0, pos_x, pos_y, 'decision', { "decision": 'option_1'}, decision );
           break;
         case 'aws':
           var aws = `
