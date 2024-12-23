@@ -87,7 +87,8 @@
                     jsonData &&
                     jsonData.drawflow &&
                     typeof jsonData.drawflow === 'object' &&
-                    Object.keys(jsonData.drawflow).length > 0
+                    Object.keys(jsonData.drawflow).length > 0 &&
+                    jsonData.drawflow.Home
                   ) {
                     editor.clearModuleSelected(); // Clear current module
                     editor.import(jsonData); // Import the JSON data
@@ -95,7 +96,7 @@
                     Swal.fire('Success', 'Flow imported successfully!', 'success');
                   } else {
                     console.error('Invalid JSON structure:', jsonData);
-                    Swal.fire('Error', 'Invalid JSON structure! Please ensure the file contains a valid "drawflow" object with at least one module.', 'error');
+                    Swal.fire('Error', 'Invalid JSON structure! Please ensure the file contains a valid "drawflow" object with a "Home" module.', 'error');
                   }
                 } catch (error) {
                   console.error('Error parsing JSON:', error.message);
