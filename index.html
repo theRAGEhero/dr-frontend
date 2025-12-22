@@ -7,6 +7,7 @@
   <title>App Democracy Routes</title>
   <meta name="description" content="App Democracy Routes is a platform to create a platform for civic participation.">
   <link rel="icon" href="https://democracyroutes.com/wp-content/uploads/2024/03/albero-logo-dr-120.png" type="image/png">
+  <script src="ontology.js"></script>
 </head>
 <body>
   <script src="https://cdn.jsdelivr.net/gh/jerosoler/Drawflow/dist/drawflow.min.js"></script>
@@ -17,58 +18,43 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
   <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
+  <!-- Google API Client Library for JavaScript -->
+  <script src="https://apis.google.com/js/api.js"></script>
 
 
   <header>
     <h2>Democracy Routes</h2>
+    <div class="ontology-status">Ontology: <span data-ontology-status>Loading…</span></div>
     <div class="github-link"><a href="https://democracyroutes.com" target="_blank"><img src="https://democracyroutes.com/wp-content/uploads/2024/03/albero-logo-dr-120.png" alt="Democracy Routes Logo" style="height: 50px;"></a></div>
-    <div class="them-edit-link"><a href="https://jerosoler.github.io/drawflow-theme-generator/" target="_blank">🎨</a></div>
   </header>
   <div class="wrapper">
     <div class="col">
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="discussion">
-        <i class="fas fa-comments"></i><span> Discussion</span>
+      <div class="module-sidebar-header">
+        <button class="module-collapse-btn" type="button" onclick="toggleModuleSidebar()" aria-label="Toggle module panel">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span>Modules</span>
       </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="decision">
-        <i class="fas fa-balance-scale"></i><span> Decision</span>
+      <div class="module-editor-trigger" onclick="openModuleEditor()">
+        <i class="fas fa-cog"></i><span> Module Editor</span>
       </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="email">
-        <i class="fas fa-at"></i><span> Email send</span>
-      </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="participant">
-        <i class="fas fa-user"></i><span> Participant</span>
-      </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="ai_agents">
-        <i class="fas fa-robot"></i><span> AI Agents</span>
-      </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="gamification">
-        <i class="fas fa-gamepad"></i><span> Gamification</span>
-      </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="conflict_resolution">
-        <i class="fas fa-handshake"></i><span> Conflict Resolution</span>
-      </div>
-      <div class="drag-drawflow" draggable="true" ondragstart="drag(event)" data-node="custom">
-        <i class="fas fa-cogs"></i><span> Custom</span>
+
+      <div id="ontology-palette" class="ontology-panel">
+        <h3>Ontology Classes</h3>
+        <input type="search" placeholder="Search classes" id="ontology-search">
+        <div class="ontology-panel-list" data-ontology-list>
+          <p class="ontology-panel-empty">Loading classes…</p>
+        </div>
       </div>
 
 
     </div>
     <div class="col-right">
-      <div class="menu">
-        <ul>
-          <li onclick="editor.changeModule('Home'); changeModule(event);" class="selected">Home</li>
-          <li onclick="editor.changeModule('Other'); changeModule(event);">Other Module</li>
-        </ul>
-      </div>
+      <div class="menu"></div>
       <div id="drawflow" ondrop="drop(event)" ondragover="allowDrop(event)">
 
         <div class="btn-clear" onclick="editor.clearModuleSelected()">Clear</div>
         <div class="btn-export" onclick="saveFlow()">Save</div>
-        <div class="btn-export" onclick="Swal.fire({ title: 'Export',
-        html: '<pre><code>'+JSON.stringify(editor.export(), null, 4)+'</code></pre>'
-        })">Export</div>
-        <div class="btn-import" onclick="document.getElementById('file-input').click()">Import</div>
-        <input type="file" id="file-input" accept=".json" style="display: none;" onchange="importFlow(event)">
         <script>
           function importFlow(event) {
             const file = event.target.files[0];
@@ -92,6 +78,8 @@
                     editor.clearModuleSelected(); // Clear current module
                     editor.import(jsonData); // Import the JSON data
                     editor.changeModule('Home'); // Ensure the "Home" module is active
+                    currentWorkflowId = null;
+                    currentWorkflowTitle = '';
                     Swal.fire('Success', 'Flow imported successfully!', 'success');
                   } else {
                     console.error('Invalid JSON structure:', jsonData);
@@ -139,6 +127,25 @@
         </div>
       </div>
     </div>
+    <aside class="workflow-sidebar" id="workflow-sidebar">
+      <div class="workflow-sidebar-header">
+        <button class="workflow-collapse-btn" type="button" onclick="toggleWorkflowSidebar()" aria-label="Toggle workflow panel">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <h3>Workflows</h3>
+        <button class="btn-new-workflow" type="button" onclick="createNewWorkflow()">New</button>
+      </div>
+      <div class="workflow-panel-list" id="workflow-panel-list">
+        <p class="empty-state">Loading workflows…</p>
+      </div>
+      <div class="workflow-sidebar-actions">
+        <button class="btn-workflow-action" type="button" onclick="exportFlow()">Export</button>
+        <button class="btn-workflow-action" type="button" onclick="document.getElementById('workflow-import-input').click()">Import</button>
+        <button class="btn-workflow-action" type="button" onclick="renameCurrentWorkflow()">Rename</button>
+        <button class="btn-workflow-action btn-workflow-delete" type="button" onclick="deleteCurrentWorkflow()">Delete</button>
+        <input type="file" id="workflow-import-input" accept=".json" style="display: none;" onchange="importFlow(event)">
+      </div>
+    </aside>
   </div>
 
   <script>
@@ -146,6 +153,12 @@
     const editor = new Drawflow(id);
     editor.reroute = true;
     editor.start();
+    if (window.ontologyIntegration) {
+      window.ontologyIntegration.bindEditor(editor);
+    }
+    window.addEventListener('DOMContentLoaded', function() {
+      initializeAppData();
+    });
 
 
   /*
@@ -243,12 +256,21 @@
 
     /* Mouse and Touch Actions */
 
-    var elements = document.getElementsByClassName('drag-drawflow');
-    for (var i = 0; i < elements.length; i++) {
-      elements[i].addEventListener('touchend', drop, false);
-      elements[i].addEventListener('touchmove', positionMobile, false);
-      elements[i].addEventListener('touchstart', drag, false );
+    function bindDragElements(context) {
+      var elements = (context || document).getElementsByClassName('drag-drawflow');
+      for (var i = 0; i < elements.length; i++) {
+        var el = elements[i];
+        if (el.dataset.dragBound) continue;
+        el.addEventListener('dragstart', drag, false);
+        el.addEventListener('touchend', drop, false);
+        el.addEventListener('touchmove', positionMobile, false);
+        el.addEventListener('touchstart', drag, false);
+        el.dataset.dragBound = 'true';
+      }
     }
+
+    bindDragElements(document);
+    window.bindDrawflowDragElements = bindDragElements;
 
     var mobile_item_selec = '';
     var mobile_last_move = null;
@@ -261,10 +283,22 @@
     }
 
     function drag(ev) {
+      var target = ev.target.closest('.drag-drawflow');
+      if (!target) return;
+      var nodeType = target.getAttribute('data-node');
+      var payload = nodeType;
+      var ontologyIri = target.getAttribute('data-ontology-iri');
+      var ontologyLabel = target.getAttribute('data-ontology-label');
+      if (ontologyIri) {
+        payload += '::' + encodeURIComponent(ontologyIri);
+        if (ontologyLabel) {
+          payload += '::' + encodeURIComponent(ontologyLabel);
+        }
+      }
       if (ev.type === "touchstart") {
-        mobile_item_selec = ev.target.closest(".drag-drawflow").getAttribute('data-node');
+        mobile_item_selec = payload;
       } else {
-      ev.dataTransfer.setData("node", ev.target.getAttribute('data-node'));
+        ev.dataTransfer.setData("node", payload);
       }
     }
 
@@ -283,13 +317,50 @@
 
     }
 
-    function addNodeToDrawFlow(name, pos_x, pos_y) {
+    function parseNodePayload(payload) {
+      if (!payload) return { type: '', iri: '', label: '' };
+      var parts = payload.split('::');
+      return {
+        type: parts[0],
+        iri: parts[1] ? decodeURIComponent(parts[1]) : '',
+        label: parts[2] ? decodeURIComponent(parts[2]) : ''
+      };
+    }
+
+    function escapeHTML(text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function addNodeToDrawFlow(payload, pos_x, pos_y) {
       if(editor.editor_mode === 'fixed') {
         return false;
       }
+      var parsed = parseNodePayload(payload);
+      var name = parsed.type || payload;
       pos_x = pos_x * ( editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom)) - (editor.precanvas.getBoundingClientRect().x * ( editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom)));
       pos_y = pos_y * ( editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom)) - (editor.precanvas.getBoundingClientRect().y * ( editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom)));
 
+      // Check for custom modules FIRST
+      const customModule = ModuleStore.getCustomById(name);
+      if (customModule) {
+        const html = ModuleTemplateGenerator.generateHTML(customModule);
+        const data = ModuleTemplateGenerator.generateInitialData(customModule);
+        editor.addNode(
+          customModule.id,
+          customModule.inputs,
+          customModule.outputs,
+          pos_x, pos_y,
+          customModule.name,
+          data,
+          html
+        );
+        return;
+      }
 
       switch (name) {
         case 'discussion':
@@ -305,6 +376,12 @@
               </select>
               <p>Info</p>
               <textarea df-discussion-info placeholder="Enter additional information"></textarea>
+              <div class="ontology-field">
+                <label>Ontology concept
+                  <select class="ontology-select" data-ontology-type="discussion" data-default-fragment="DeliberationProcess" data-default-iri="https://w3id.org/deliberation/ontology#DeliberationProcess"></select>
+                </label>
+                <p class="ontology-description" data-ontology-description="discussion"></p>
+              </div>
             </div>
           </div>
           `;
@@ -326,6 +403,12 @@
               </select>
               <p>Info</p>
               <textarea df-decision-info placeholder="Enter additional information"></textarea>
+              <div class="ontology-field">
+                <label>Ontology concept
+                  <select class="ontology-select" data-ontology-type="decision" data-default-fragment="Consensus" data-default-iri="https://w3id.org/deliberation/ontology#Consensus"></select>
+                </label>
+                <p class="ontology-description" data-ontology-description="decision"></p>
+              </div>
             </div>
           </div>
           `;
@@ -355,12 +438,20 @@
                   <option value="sensitivity">Sensitivity</option>
                   <option value="ideology">Ideology</option>
                 </select>
-              <p>Info</p>
-              <textarea df-participant-info placeholder="Enter additional information"></textarea>
+                <p>Google Sheets Link</p>
+                <input type="url" df-google-sheets-link placeholder="https://docs.google.com/spreadsheets/d/...">
+                <p>Info</p>
+                <textarea df-participant-info placeholder="Enter additional information"></textarea>
+                <div class="ontology-field">
+                  <label>Ontology concept
+                    <select class="ontology-select" data-ontology-type="participant" data-default-fragment="Participant" data-default-iri="https://w3id.org/deliberation/ontology#Participant"></select>
+                  </label>
+                  <p class="ontology-description" data-ontology-description="participant"></p>
+                </div>
               </div>
             </div>
             `;
-            editor.addNode('participant', 1, 1, pos_x, pos_y, 'Participant', { "participant_attribute": 'skill', "info": '' }, participant );
+            editor.addNode('participant', 1, 1, pos_x, pos_y, 'Participant', { "participant_attribute": 'skill', "google_sheets_link": '', "info": '' }, participant );
             break;
           case 'ai_agents':
             var ai_agents = `
@@ -376,8 +467,14 @@
                   <option value="mediator">Mediator</option>
                   <option value="custom_agent">Custom Agent</option>
                 </select>
-              <p>Info</p>
-              <textarea df-agent-info placeholder="Enter additional information"></textarea>
+                <p>Info</p>
+                <textarea df-agent-info placeholder="Enter additional information"></textarea>
+                <div class="ontology-field">
+                  <label>Ontology concept
+                    <select class="ontology-select" data-ontology-type="ai_agents" data-default-fragment="InformationResource" data-default-iri="https://w3id.org/deliberation/ontology#InformationResource"></select>
+                  </label>
+                  <p class="ontology-description" data-ontology-description="ai_agents"></p>
+                </div>
               </div>
             </div>
             `;
@@ -390,8 +487,14 @@
               <div class="box">
                 <p>Enter gamification details</p>
                 <input type="text" df-name>
-              <p>Info</p>
-              <textarea df-gamification-info placeholder="Enter additional information"></textarea>
+                <p>Info</p>
+                <textarea df-gamification-info placeholder="Enter additional information"></textarea>
+                <div class="ontology-field">
+                  <label>Ontology concept
+                    <select class="ontology-select" data-ontology-type="gamification" data-default-fragment="Contribution" data-default-iri="https://w3id.org/deliberation/ontology#Contribution"></select>
+                  </label>
+                  <p class="ontology-description" data-ontology-description="gamification"></p>
+                </div>
               </div>
             </div>
             `;
@@ -411,12 +514,54 @@
                 </select>
                 <p>Info</p>
                 <textarea df-conflict-info placeholder="Enter additional information"></textarea>
+                <div class="ontology-field">
+                  <label>Ontology concept
+                    <select class="ontology-select" data-ontology-type="conflict_resolution" data-default-fragment="Consensus" data-default-iri="https://w3id.org/deliberation/ontology#Consensus"></select>
+                  </label>
+                  <p class="ontology-description" data-ontology-description="conflict_resolution"></p>
+                </div>
               </div>
             </div>
             `;
             editor.addNode('conflict_resolution', 1, 1, pos_x, pos_y, 'Conflict_Resolution', { "name": ''}, conflict_resolution );
             break;
 
+          case 'citizen_assembly':
+            var citizen_assembly = `
+            <div>
+              <div class="title-box"><i class="fas fa-users"></i> Citizen Assembly</div>
+              <div class="box">
+                <p>Number of Tables</p>
+                <input type="number" df-num-tables min="1" placeholder="Enter number of tables">
+
+                <p>Streaming Mode</p>
+                <select df-streaming-mode>
+                  <option value="live">Live Streaming</option>
+                  <option value="recorded">Recorded & Transcribed</option>
+                </select>
+
+                <p>Extra Security</p>
+                <input type="checkbox" df-extra-security id="extra-security-checkbox">
+                <label for="extra-security-checkbox">Enable extra security measures</label>
+
+                <p>Multilanguage</p>
+                <select df-multilanguage>
+                  <option value="en">English (EN)</option>
+                  <option value="es">Spanish (ES)</option>
+                  <option value="fr">French (FR)</option>
+                  <option value="de">German (DE)</option>
+                  <option value="it">Italian (IT)</option>
+                </select>
+              </div>
+            </div>
+            `;
+            editor.addNode('citizen_assembly', 1, 1, pos_x, pos_y, 'Citizen_Assembly', {
+              "num_tables": '',
+              "streaming_mode": 'live',
+              "extra_security": false,
+              "multilanguage": 'en'
+            }, citizen_assembly);
+            break;
 
           case 'custom':
             var custom = `
@@ -427,10 +572,42 @@
                 <input type="text" df-custom-name placeholder="Custom Name">
                 <p>Info</p>
                 <textarea df-custom-info placeholder="Enter additional information"></textarea>
+                <div class="ontology-field">
+                  <label>Ontology concept
+                    <select class="ontology-select" data-ontology-type="custom" data-default-fragment="DeliberationProcess" data-default-iri="https://w3id.org/deliberation/ontology#DeliberationProcess"></select>
+                  </label>
+                  <p class="ontology-description" data-ontology-description="custom"></p>
+                </div>
               </div>
             </div>
             `;
             editor.addNode('custom', 1, 1, pos_x, pos_y, 'Custom', { "name": '', "info": '' }, custom );
+            break;
+          case 'ontology_class':
+            var selectedClass = window.ontologyStore && window.ontologyStore.getClassByIri(parsed.iri);
+            if (!selectedClass && parsed.label) {
+              selectedClass = window.ontologyStore && window.ontologyStore.getClassByIri(parsed.label);
+            }
+            if (!selectedClass) {
+              console.warn('Ontology class not found for', parsed.iri || parsed.label);
+              return false;
+            }
+            var classDescription = selectedClass.comment ? escapeHTML(selectedClass.comment) : 'No description available.';
+            var classTemplate = `
+            <div>
+              <div class="title-box"><i class="fas fa-book"></i> ${escapeHTML(selectedClass.label)}</div>
+              <div class="box">
+                <p><strong>IRI:</strong> ${escapeHTML(selectedClass.iri)}</p>
+                <p>${classDescription}</p>
+              </div>
+            </div>
+            `;
+            editor.addNode('ontology_class', 1, 1, pos_x, pos_y, 'Ontology', {
+              ontology: {
+                classIri: selectedClass.iri,
+                label: selectedClass.label
+              }
+            }, classTemplate);
             break;
         default:
       }
@@ -486,17 +663,895 @@
 
     }
 
-    function saveFlow() {
-      const flowData = JSON.stringify(editor.export(), null, 4);
-      const fileName = prompt("Enter a name for the flow file:");
-      if (fileName) {
-        const blob = new Blob([JSON.stringify(editor.export(), null, 4)], { type: "application/json" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `flows/${fileName}.json`;
-        a.click();
+    async function saveFlow() {
+      try {
+        const drawflow = editor.export();
+        if (currentWorkflowId) {
+          const title = currentWorkflowTitle || getDefaultWorkflowTitle();
+          await WorkflowAPI.update(currentWorkflowId, { title, drawflow });
+          currentWorkflowTitle = title;
+        } else {
+          const title = currentWorkflowTitle || getDefaultWorkflowTitle();
+          const created = await WorkflowAPI.create({ title, drawflow });
+          currentWorkflowId = created.id;
+          currentWorkflowTitle = created.title;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Saved!',
+          text: 'Workflow saved to the database.',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        lastSavedSnapshot = JSON.stringify(drawflow);
+        loadWorkflowPanel();
+      } catch (error) {
+        console.error('Failed to save workflow:', error);
+        Swal.fire('Error', 'Failed to save workflow. Is the server running?', 'error');
       }
     }
+
+    function exportFlow() {
+      const exportData = JSON.stringify(editor.export(), null, 2);
+      const safeExportData = escapeHTML(exportData);
+      Swal.fire({
+        title: 'Export Flow',
+        html: `<div class="export-modal"><p class="export-tip">Copy the JSON below to reuse or share this workflow.</p><pre class="export-pre" id="export-pre">${safeExportData}</pre></div>`,
+        width: '70vw',
+        customClass: { popup: 'swal-export' },
+        showConfirmButton: true,
+        confirmButtonText: 'Close'
+      });
+    }
+
+  // ============================================
+  // CUSTOM MODULE EDITOR SYSTEM
+  // ============================================
+
+  // API + Storage
+  const API_BASE = '/api';
+
+  async function apiRequest(path, options = {}) {
+    const config = {
+      headers: { 'Content-Type': 'application/json' },
+      ...options
+    };
+    if (config.body && typeof config.body !== 'string') {
+      config.body = JSON.stringify(config.body);
+    }
+    const response = await fetch(`${API_BASE}${path}`, config);
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || `Request failed: ${response.status}`);
+    }
+    return response.status === 204 ? null : response.json();
+  }
+
+  const ModuleStore = {
+    modules: [],
+
+    async refresh() {
+      this.modules = await apiRequest('/modules');
+      return this.modules;
+    },
+
+    getAll() {
+      return this.modules;
+    },
+
+    getById(id) {
+      return this.modules.find(m => m.id === id);
+    },
+
+    getCustomById(id) {
+      const module = this.getById(id);
+      return module && module.type === 'custom' ? module : null;
+    },
+
+    getBuiltInModules() {
+      return this.modules.filter(m => m.type === 'builtin');
+    }
+  };
+
+  const ModuleAPI = {
+    async create(module) {
+      return apiRequest('/modules', { method: 'POST', body: module });
+    },
+
+    async update(id, module) {
+      return apiRequest(`/modules/${id}`, { method: 'PUT', body: module });
+    },
+
+    async delete(id) {
+      return apiRequest(`/modules/${id}`, { method: 'DELETE' });
+    },
+
+    async importModules(modules) {
+      return apiRequest('/modules/import', { method: 'POST', body: { modules } });
+    }
+  };
+
+  const WorkflowAPI = {
+    async list() {
+      return apiRequest('/workflows');
+    },
+
+    async get(id) {
+      return apiRequest(`/workflows/${id}`);
+    },
+
+    async create(payload) {
+      return apiRequest('/workflows', { method: 'POST', body: payload });
+    },
+
+    async update(id, payload) {
+      return apiRequest(`/workflows/${id}`, { method: 'PUT', body: payload });
+    },
+
+    async delete(id) {
+      return apiRequest(`/workflows/${id}`, { method: 'DELETE' });
+    }
+  };
+
+  let currentWorkflowId = null;
+  let currentWorkflowTitle = '';
+  let lastSavedSnapshot = '';
+
+  function getDefaultWorkflowTitle() {
+    const now = new Date();
+    const stamp = now.toISOString().slice(0, 16).replace('T', ' ');
+    return `Workflow ${stamp}`;
+  }
+
+  async function migrateLocalCustomModules() {
+    const key = 'democracyRoutes_customModules';
+    const raw = localStorage.getItem(key);
+    if (!raw) return;
+    try {
+      const modules = JSON.parse(raw);
+      if (!Array.isArray(modules) || modules.length === 0) {
+        localStorage.removeItem(key);
+        return;
+      }
+      const normalized = modules.map(module => ({ ...module, type: 'custom' }));
+      await ModuleAPI.importModules(normalized);
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error('Failed to migrate local modules:', error);
+    }
+  }
+
+  // Template Generator
+  const ModuleTemplateGenerator = {
+    generateHTML(module) {
+      const fields = module.fields.map(field => this.generateField(field)).join('\n                ');
+
+      return `
+              <div>
+                <div class="title-box">
+                  <i class="fas ${module.icon}"></i> ${module.name}
+                </div>
+                <div class="box">
+                  ${fields}
+                </div>
+              </div>
+              `;
+    },
+
+    generateField(field) {
+      const requiredMark = field.required ? ' *' : '';
+
+      switch (field.type) {
+        case 'text':
+        case 'url':
+          return `<p>${field.label}${requiredMark}</p>
+                  <input type="${field.type}" df-${field.slug} placeholder="${field.placeholder || ''}">`;
+
+        case 'number':
+          return `<p>${field.label}${requiredMark}</p>
+                  <input type="number" df-${field.slug} placeholder="${field.placeholder || ''}">`;
+
+        case 'textarea':
+          return `<p>${field.label}${requiredMark}</p>
+                  <textarea df-${field.slug} placeholder="${field.placeholder || ''}"></textarea>`;
+
+        case 'select':
+          const options = (field.options || []).map(opt =>
+            `<option value="${this.sanitize(opt)}">${opt}</option>`
+          ).join('\n                  ');
+          return `<p>${field.label}${requiredMark}</p>
+                  <select df-${field.slug}>
+                    ${options}
+                  </select>`;
+
+        case 'checkbox':
+          const checkboxId = `${field.slug}-checkbox`;
+          return `<p>${field.label}${requiredMark}</p>
+                  <input type="checkbox" df-${field.slug} id="${checkboxId}">
+                  <label for="${checkboxId}">${field.placeholder || 'Enable'}</label>`;
+
+        default:
+          return '';
+      }
+    },
+
+    generateInitialData(module) {
+      const data = {};
+      module.fields.forEach(field => {
+        const key = field.slug.replace(/-/g, '_');
+        data[key] = field.defaultValue || '';
+      });
+      return data;
+    },
+
+    sanitize(text) {
+      return String(text).replace(/[<>"']/g, '');
+    }
+  };
+
+  // Icon categories
+  const ICON_LIST = [
+    'fa-cogs', 'fa-star', 'fa-check', 'fa-edit', 'fa-plus',
+    'fa-user', 'fa-users', 'fa-user-circle', 'fa-user-tie',
+    'fa-comments', 'fa-envelope', 'fa-phone', 'fa-bell',
+    'fa-briefcase', 'fa-chart-line', 'fa-dollar-sign', 'fa-clipboard',
+    'fa-robot', 'fa-microchip', 'fa-server', 'fa-database',
+    'fa-heart', 'fa-flag', 'fa-calendar', 'fa-clock',
+    'fa-file', 'fa-folder', 'fa-image', 'fa-video'
+  ];
+
+  // Module Editor UI
+  const ModuleEditorUI = {
+    currentModuleId: null,
+    currentFieldId: 0,
+    currentModuleType: 'custom',
+
+    async open() {
+      this.currentModuleId = null;
+      this.currentFieldId = 0;
+      this.currentModuleType = 'custom';
+
+      try {
+        await ModuleStore.refresh();
+      } catch (error) {
+        console.error('Failed to load modules:', error);
+      }
+
+      Swal.fire({
+        title: 'Module Editor',
+        width: '90vw',
+        showConfirmButton: false,
+        showCloseButton: true,
+        customClass: {
+          popup: 'module-editor-modal'
+        },
+        html: this.getModalHTML(),
+        didOpen: () => {
+          this.initialize();
+        }
+      });
+    },
+
+    getModalHTML() {
+      return `
+        <div class="module-editor-container">
+          <div class="module-editor-sidebar">
+            <button class="btn-new-module" onclick="ModuleEditorUI.createNewModule()">
+              <i class="fas fa-plus"></i> New Module
+            </button>
+            <div class="module-list" id="module-list"></div>
+          </div>
+          
+          <div class="module-editor-main">
+            <div class="module-editor-form">
+              <div class="editor-section">
+                <h3>Basic Settings</h3>
+                <label>
+                  Module Name:
+                  <input type="text" id="module-name" placeholder="e.g., Budget Planning">
+                </label>
+                
+                <label>
+                  Icon:
+                  <div class="icon-picker-grid" id="icon-picker"></div>
+                </label>
+                
+                <div class="input-output-controls">
+                  <label>
+                    Inputs:
+                    <input type="number" id="module-inputs" min="0" max="5" value="1">
+                  </label>
+                  <label>
+                    Outputs:
+                    <input type="number" id="module-outputs" min="0" max="5" value="1">
+                  </label>
+                </div>
+                
+                <label>
+                  Copy from existing:
+                  <select id="copy-from-module" onchange="ModuleEditorUI.copyFromModule()">
+                    <option value="">-- Start from scratch --</option>
+                  </select>
+                </label>
+              </div>
+              
+              <div class="editor-section">
+                <h3>Form Fields</h3>
+                <button class="btn-add-field" onclick="ModuleEditorUI.addField()">
+                  <i class="fas fa-plus"></i> Add Field
+                </button>
+                <div class="fields-container" id="fields-container"></div>
+              </div>
+              
+              <div class="editor-actions">
+                <button class="btn-save" onclick="ModuleEditorUI.saveModule()">
+                  <i class="fas fa-save"></i> Save Module
+                </button>
+                <button class="btn-delete" onclick="ModuleEditorUI.deleteModule()" style="display:none;" id="delete-btn">
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+              </div>
+            </div>
+            
+            <div class="module-preview">
+              <h3>Preview</h3>
+              <div class="preview-container" id="preview-container">
+                <p style="color: #999; text-align: center;">Fill in the form to see a preview</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+
+    initialize() {
+      this.loadModuleList();
+      this.setupIconPicker();
+      this.populateCopyDropdown();
+      this.addEventListeners();
+    },
+
+    addEventListeners() {
+      const inputs = ['module-name', 'module-inputs', 'module-outputs'];
+      inputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => this.updatePreview());
+      });
+    },
+
+    setupIconPicker() {
+      const picker = document.getElementById('icon-picker');
+      if (!picker) return;
+
+      picker.innerHTML = ICON_LIST.map(icon =>
+        `<div class="icon-item" data-icon="${icon}" onclick="ModuleEditorUI.selectIcon('${icon}')">
+          <i class="fas ${icon}"></i>
+        </div>`
+      ).join('');
+    },
+
+    selectIcon(iconClass) {
+      document.querySelectorAll('.icon-item').forEach(el => el.classList.remove('selected'));
+      const selected = document.querySelector(`[data-icon="${iconClass}"]`);
+      if (selected) {
+        selected.classList.add('selected');
+        this.updatePreview();
+      }
+    },
+
+    loadModuleList() {
+      const modules = ModuleStore.getAll();
+      const listEl = document.getElementById('module-list');
+
+      if (modules.length === 0) {
+        listEl.innerHTML = '<p class="empty-state">No custom modules yet</p>';
+        return;
+      }
+
+      listEl.innerHTML = modules.map(m => `
+        <div class="module-list-item ${m.id === this.currentModuleId ? 'active' : ''}" 
+             onclick="ModuleEditorUI.loadModule('${m.id}')">
+          <i class="fas ${m.icon}"></i>
+          <span>${m.name}</span>
+        </div>
+      `).join('');
+    },
+
+    populateCopyDropdown() {
+      const dropdown = document.getElementById('copy-from-module');
+      if (!dropdown) return;
+
+      const builtInModules = ModuleStore.getBuiltInModules();
+      const customModules = ModuleStore.getAll().filter(module => module.type === 'custom');
+
+      let html = '<option value="">-- Start from scratch --</option>';
+      html += '<optgroup label="Built-in Modules">';
+      builtInModules.forEach(m => {
+        html += `<option value="builtin:${m.id}">${m.name}</option>`;
+      });
+      html += '</optgroup>';
+
+      if (customModules.length > 0) {
+        html += '<optgroup label="Custom Modules">';
+        customModules.forEach(m => {
+          html += `<option value="custom:${m.id}">${m.name}</option>`;
+        });
+        html += '</optgroup>';
+      }
+
+      dropdown.innerHTML = html;
+    },
+
+    loadModule(id) {
+      const module = ModuleStore.getById(id);
+      if (!module) return;
+
+      this.currentModuleId = id;
+      this.currentFieldId = 0;
+      this.currentModuleType = module.type || 'custom';
+
+      document.getElementById('module-name').value = module.name;
+      document.getElementById('module-inputs').value = module.inputs;
+      document.getElementById('module-outputs').value = module.outputs;
+
+      this.selectIcon(module.icon);
+
+      const container = document.getElementById('fields-container');
+      container.innerHTML = '';
+      module.fields.forEach(field => {
+        this.addFieldRow(field);
+      });
+
+      document.getElementById('delete-btn').style.display = 'block';
+
+      this.loadModuleList();
+      this.updatePreview();
+    },
+
+    createNewModule() {
+      this.currentModuleId = null;
+      this.currentFieldId = 0;
+      this.currentModuleType = 'custom';
+
+      document.getElementById('module-name').value = '';
+      document.getElementById('module-inputs').value = '1';
+      document.getElementById('module-outputs').value = '1';
+      document.getElementById('copy-from-module').value = '';
+      document.getElementById('fields-container').innerHTML = '';
+
+      document.querySelectorAll('.icon-item').forEach(el => el.classList.remove('selected'));
+      document.getElementById('delete-btn').style.display = 'none';
+
+      this.loadModuleList();
+      this.updatePreview();
+    },
+
+    copyFromModule() {
+      const dropdown = document.getElementById('copy-from-module');
+      const value = dropdown.value;
+
+      if (!value) {
+        this.createNewModule();
+        return;
+      }
+
+      const [type, id] = value.split(':');
+
+      const module = ModuleStore.getById(id);
+      if (module) {
+        document.getElementById('module-name').value = module.name + ' Copy';
+        document.getElementById('module-inputs').value = module.inputs;
+        document.getElementById('module-outputs').value = module.outputs;
+        this.selectIcon(module.icon);
+
+        const container = document.getElementById('fields-container');
+        container.innerHTML = '';
+        module.fields.forEach(field => {
+          this.addFieldRow({ ...field });
+        });
+      }
+
+      this.updatePreview();
+    },
+
+    addField(fieldData = null) {
+      const fieldId = `field_${this.currentFieldId++}`;
+      const field = fieldData || {
+        id: fieldId,
+        type: 'text',
+        label: '',
+        slug: '',
+        placeholder: '',
+        required: false,
+        options: [],
+        defaultValue: ''
+      };
+
+      this.addFieldRow(field);
+      this.updatePreview();
+    },
+
+    addFieldRow(field) {
+      const container = document.getElementById('fields-container');
+      const fieldDiv = document.createElement('div');
+      fieldDiv.className = 'field-editor-row';
+      fieldDiv.dataset.fieldId = field.id;
+
+      const showOptions = field.type === 'select';
+      const showPlaceholder = ['text', 'number', 'textarea', 'url', 'checkbox'].includes(field.type);
+
+      fieldDiv.innerHTML = `
+        <div class="field-controls">
+          <div class="field-row">
+            <select class="field-type-select" onchange="ModuleEditorUI.updateFieldType(this)">
+              <option value="text" ${field.type === 'text' ? 'selected' : ''}>Text</option>
+              <option value="number" ${field.type === 'number' ? 'selected' : ''}>Number</option>
+              <option value="textarea" ${field.type === 'textarea' ? 'selected' : ''}>Text Area</option>
+              <option value="select" ${field.type === 'select' ? 'selected' : ''}>Select</option>
+              <option value="checkbox" ${field.type === 'checkbox' ? 'selected' : ''}>Checkbox</option>
+              <option value="url" ${field.type === 'url' ? 'selected' : ''}>URL</option>
+            </select>
+            <input type="text" class="field-label-input" placeholder="Label" value="${field.label || ''}">
+            <input type="text" class="field-slug-input" placeholder="slug" value="${field.slug || ''}">
+          </div>
+          <div class="field-row" style="display: ${showPlaceholder ? 'flex' : 'none'};">
+            <input type="text" class="field-placeholder-input" placeholder="Placeholder / Checkbox label" value="${field.placeholder || ''}">
+          </div>
+          <div class="field-row" style="display: ${showOptions ? 'flex' : 'none'};">
+            <input type="text" class="field-options-input" placeholder="Options (comma-separated)" value="${(field.options || []).join(', ')}">
+          </div>
+          <div class="field-row">
+            <label style="margin: 0;">
+              <input type="checkbox" class="field-required-check" ${field.required ? 'checked' : ''}> Required
+            </label>
+          </div>
+        </div>
+        <button class="btn-remove-field" onclick="ModuleEditorUI.removeField(this)">
+          <i class="fas fa-trash"></i>
+        </button>
+      `;
+
+      container.appendChild(fieldDiv);
+
+      // Add event listeners
+      fieldDiv.querySelectorAll('input, select').forEach(el => {
+        el.addEventListener('input', () => this.updatePreview());
+        el.addEventListener('change', () => this.updatePreview());
+      });
+    },
+
+    updateFieldType(selectEl) {
+      const row = selectEl.closest('.field-editor-row');
+      const type = selectEl.value;
+
+      const placeholderRow = row.querySelectorAll('.field-row')[1];
+      const optionsRow = row.querySelectorAll('.field-row')[2];
+
+      const showPlaceholder = ['text', 'number', 'textarea', 'url', 'checkbox'].includes(type);
+      const showOptions = type === 'select';
+
+      placeholderRow.style.display = showPlaceholder ? 'flex' : 'none';
+      optionsRow.style.display = showOptions ? 'flex' : 'none';
+
+      this.updatePreview();
+    },
+
+    removeField(btn) {
+      btn.closest('.field-editor-row').remove();
+      this.updatePreview();
+    },
+
+    collectFormData() {
+      const name = document.getElementById('module-name').value.trim();
+      const inputs = parseInt(document.getElementById('module-inputs').value) || 1;
+      const outputs = parseInt(document.getElementById('module-outputs').value) || 1;
+      const selectedIcon = document.querySelector('.icon-item.selected');
+      const icon = selectedIcon ? selectedIcon.dataset.icon : 'fa-cogs';
+
+      const fields = [];
+      document.querySelectorAll('.field-editor-row').forEach(row => {
+        const type = row.querySelector('.field-type-select').value;
+        const label = row.querySelector('.field-label-input').value.trim();
+        const slug = row.querySelector('.field-slug-input').value.trim() ||
+                      label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const placeholder = row.querySelector('.field-placeholder-input')?.value.trim() || '';
+        const required = row.querySelector('.field-required-check').checked;
+        const optionsInput = row.querySelector('.field-options-input')?.value || '';
+        const options = type === 'select' ? optionsInput.split(',').map(s => s.trim()).filter(s => s) : [];
+
+        if (label) {
+          fields.push({
+            id: row.dataset.fieldId,
+            type,
+            label,
+            slug,
+            placeholder,
+            required,
+            options,
+            defaultValue: ''
+          });
+        }
+      });
+
+      return { name, inputs, outputs, icon, fields };
+    },
+
+    validateModule(data) {
+      if (!data.name) {
+        alert('Please enter a module name');
+        return false;
+      }
+
+      if (data.fields.length === 0) {
+        alert('Please add at least one field');
+        return false;
+      }
+
+      const slugs = data.fields.map(f => f.slug);
+      const duplicates = slugs.filter((s, i) => slugs.indexOf(s) !== i);
+      if (duplicates.length > 0) {
+        alert(`Duplicate field slugs found: ${duplicates.join(', ')}`);
+        return false;
+      }
+
+      return true;
+    },
+
+    async saveModule() {
+      const data = this.collectFormData();
+
+      if (!this.validateModule(data)) {
+        return;
+      }
+
+      const slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      const timestamp = Date.now();
+      const payload = {
+        ...data,
+        slug,
+        type: this.currentModuleType || 'custom'
+      };
+
+      if (this.currentModuleId) {
+        // Update existing
+        await ModuleAPI.update(this.currentModuleId, payload);
+      } else {
+        // Create new
+        const module = {
+          id: `custom_${slug}_${timestamp}`,
+          ...payload,
+          type: 'custom',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        const saved = await ModuleAPI.create(module);
+        this.currentModuleId = saved && saved.id ? saved.id : module.id;
+        this.currentModuleType = 'custom';
+        document.getElementById('delete-btn').style.display = 'block';
+      }
+
+      await ModuleStore.refresh();
+      this.loadModuleList();
+      this.populateCopyDropdown();
+      loadModulesIntoPalette();
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Saved!',
+        text: 'Module saved successfully',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    },
+
+    async deleteModule() {
+      if (!this.currentModuleId) return;
+
+      if (confirm('Are you sure you want to delete this module?')) {
+        await ModuleAPI.delete(this.currentModuleId);
+        this.createNewModule();
+        await ModuleStore.refresh();
+        this.populateCopyDropdown();
+        loadModulesIntoPalette();
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Deleted!',
+          text: 'Module deleted successfully',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      }
+    },
+
+    updatePreview() {
+      const data = this.collectFormData();
+      const preview = document.getElementById('preview-container');
+
+      if (!data.name || data.fields.length === 0) {
+        preview.innerHTML = '<p style="color: #999; text-align: center;">Fill in the form to see a preview</p>';
+        return;
+      }
+
+      const html = ModuleTemplateGenerator.generateHTML(data);
+      preview.innerHTML = `<div class="drawflow-node">${html}</div>`;
+    }
+  };
+
+  // Entry point for gear icon
+  function openModuleEditor() {
+    ModuleEditorUI.open();
+  }
+
+    async function initializeAppData() {
+      try {
+        await migrateLocalCustomModules();
+        await loadModulesIntoPalette();
+        await loadWorkflowPanel();
+      } catch (error) {
+        console.error('Initialization failed:', error);
+        Swal.fire('Error', 'Failed to load modules. Is the server running?', 'error');
+      }
+    }
+
+  // Load custom modules into palette on page load
+  async function loadModulesIntoPalette() {
+    const palette = document.querySelector('.col');
+    if (!palette) return;
+
+    // Remove existing palette modules
+    palette.querySelectorAll('.drag-drawflow.db-module').forEach(el => el.remove());
+
+    const modules = await ModuleStore.refresh();
+
+    // Find the module editor trigger as insertion point
+    const trigger = palette.querySelector('.module-editor-trigger');
+    const insertionPoint = trigger ? trigger.nextSibling : palette.firstChild;
+
+    modules.forEach(module => {
+      const moduleEl = document.createElement('div');
+      moduleEl.className = `drag-drawflow db-module${module.type === 'custom' ? ' custom-module' : ''}`;
+      moduleEl.draggable = true;
+      moduleEl.setAttribute('data-node', module.id);
+      moduleEl.innerHTML = `<i class="fas ${module.icon}"></i><span> ${module.name}</span>`;
+
+      palette.insertBefore(moduleEl, insertionPoint);
+    });
+
+    bindDragElements(palette);
+  }
+
+  async function loadWorkflowPanel() {
+    const listEl = document.getElementById('workflow-panel-list');
+    if (!listEl) return;
+
+    try {
+      const workflows = await WorkflowAPI.list();
+      if (workflows.length === 0) {
+        listEl.innerHTML = '<p class="empty-state">No workflows saved yet</p>';
+        return;
+      }
+
+      listEl.innerHTML = workflows.map(workflow => `
+        <div class="workflow-panel-item" data-id="${workflow.id}">
+          <div class="workflow-title">${escapeHTML(workflow.title)}</div>
+        </div>
+      `).join('');
+
+      listEl.querySelectorAll('.workflow-panel-item').forEach(item => {
+        const workflowId = item.dataset.id;
+        item.addEventListener('click', async () => {
+          await attemptLoadWorkflow(workflowId);
+        });
+      });
+    } catch (error) {
+      console.error('Failed to load workflow panel:', error);
+      listEl.innerHTML = '<p class="empty-state">Failed to load workflows</p>';
+    }
+  }
+
+  function createNewWorkflow() {
+    currentWorkflowId = null;
+    currentWorkflowTitle = '';
+    editor.clearModuleSelected();
+    lastSavedSnapshot = '';
+  }
+
+  async function attemptLoadWorkflow(workflowId) {
+    if (!workflowId) return;
+    const isDirty = hasUnsavedChanges();
+
+    if (!isDirty) {
+      await loadWorkflowById(workflowId);
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: 'Unsaved changes',
+      text: 'Do you want to save the current workflow before loading another?',
+      icon: 'warning',
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: 'Save & Load',
+      denyButtonText: 'Load Without Saving',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+      await saveFlow();
+      await loadWorkflowById(workflowId);
+    } else if (result.isDenied) {
+      await loadWorkflowById(workflowId);
+    }
+  }
+
+  async function loadWorkflowById(workflowId) {
+    const workflow = await WorkflowAPI.get(workflowId);
+    editor.import(workflow.drawflow);
+    editor.changeModule('Home');
+    currentWorkflowId = workflow.id;
+    currentWorkflowTitle = workflow.title;
+    lastSavedSnapshot = JSON.stringify(workflow.drawflow || {});
+  }
+
+  function hasUnsavedChanges() {
+    if (!currentWorkflowId) return false;
+    const current = JSON.stringify(editor.export());
+    return current !== lastSavedSnapshot;
+  }
+
+  async function renameCurrentWorkflow() {
+    if (!currentWorkflowId) {
+      Swal.fire('No workflow loaded', 'Load a workflow first.', 'info');
+      return;
+    }
+    const result = await Swal.fire({
+      title: 'Rename workflow',
+      input: 'text',
+      inputValue: currentWorkflowTitle || '',
+      showCancelButton: true,
+      confirmButtonText: 'Save'
+    });
+    if (result.isConfirmed && result.value && result.value.trim()) {
+      const newTitle = result.value.trim();
+      await WorkflowAPI.update(currentWorkflowId, { title: newTitle });
+      currentWorkflowTitle = newTitle;
+      loadWorkflowPanel();
+    }
+  }
+
+  async function deleteCurrentWorkflow() {
+    if (!currentWorkflowId) {
+      Swal.fire('No workflow loaded', 'Load a workflow first.', 'info');
+      return;
+    }
+    const confirmation = await Swal.fire({
+      title: 'Delete workflow?',
+      text: 'This cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Delete'
+    });
+    if (confirmation.isConfirmed) {
+      await WorkflowAPI.delete(currentWorkflowId);
+      currentWorkflowId = null;
+      currentWorkflowTitle = '';
+      loadWorkflowPanel();
+    }
+  }
+
+  function toggleWorkflowSidebar() {
+    const sidebar = document.getElementById('workflow-sidebar');
+    if (!sidebar) return;
+    sidebar.classList.toggle('collapsed');
+  }
+
+  function toggleModuleSidebar() {
+    const moduleCol = document.querySelector('.col');
+    if (!moduleCol) return;
+    moduleCol.classList.toggle('collapsed');
+  }
   </script>
 </body>
 </html>
