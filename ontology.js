@@ -33,6 +33,7 @@
     participant: ['Participant', 'Role', 'Organization', 'Contribution'],
     ai_agents: ['InformationResource', 'Contribution', 'Argument', 'Stage'],
     gamification: ['Contribution', 'Stage', 'DeliberationProcess'],
+    media: ['InformationResource', 'Contribution', 'Topic'],
     conflict_resolution: ['Consensus', 'Argument', 'Position', 'Stage'],
     custom: null
   };

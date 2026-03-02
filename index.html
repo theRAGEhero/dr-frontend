@@ -347,18 +347,40 @@
 
       // Check for custom modules FIRST
       const customModule = ModuleStore.getCustomById(name);
-      if (customModule) {
-        const html = ModuleTemplateGenerator.generateHTML(customModule);
-        const data = ModuleTemplateGenerator.generateInitialData(customModule);
-        editor.addNode(
-          customModule.id,
-          customModule.inputs,
-          customModule.outputs,
+      const storedModule = ModuleStore.getById(name);
+      const templateModuleIds = [
+        'new_plan',
+        'new_meeting',
+        'plan_settings',
+        'plan_participants',
+        'plan_round',
+        'plan_pause',
+        'plan_prompt',
+        'plan_notes',
+        'plan_publish'
+      ];
+      const templateModule =
+        customModule || (storedModule && templateModuleIds.includes(storedModule.id) ? storedModule : null);
+
+      if (templateModule) {
+        const html = ModuleTemplateGenerator.generateHTML(templateModule);
+        const data = ModuleTemplateGenerator.generateInitialData(templateModule);
+        const newNodeId = editor.addNode(
+          templateModule.id,
+          templateModule.inputs,
+          templateModule.outputs,
           pos_x, pos_y,
-          customModule.name,
+          templateModule.name,
           data,
           html
         );
+        setTimeout(() => {
+          const nodeEl = document.getElementById(`node-${newNodeId}`);
+          if (nodeEl) {
+            hydrateDataspaceOptions(nodeEl);
+            hydrateMeditationAudioOptions(nodeEl);
+          }
+        }, 0);
         return;
       }
 
@@ -500,6 +522,28 @@
             `;
             editor.addNode('gamification', 1, 1, pos_x, pos_y, 'Gamification', { "name": '', "info": '' }, gamification );
             break;
+          case 'media':
+            var media = `
+            <div>
+              <div class="title-box"><i class="fas fa-video"></i> Media</div>
+              <div class="box">
+                <p>Media File</p>
+                <input type="file" df-media-file accept="audio/*,video/*">
+                <p>Media URL</p>
+                <input type="url" df-media-url placeholder="https://example.com/media.mp4">
+                <p>Info</p>
+                <textarea df-media-info placeholder="Enter additional information"></textarea>
+                <div class="ontology-field">
+                  <label>Ontology concept
+                    <select class="ontology-select" data-ontology-type="media" data-default-fragment="InformationResource" data-default-iri="https://w3id.org/deliberation/ontology#InformationResource"></select>
+                  </label>
+                  <p class="ontology-description" data-ontology-description="media"></p>
+                </div>
+              </div>
+            </div>
+            `;
+            editor.addNode('media', 1, 1, pos_x, pos_y, 'Media', { "media_url": '', "media_info": '' }, media );
+            break;
           case 'conflict_resolution':
             var conflict_resolution = `
             <div>
@@ -629,6 +673,11 @@
     //e.target.children[0].style.top  =  -editor.canvas_y - editor.container.offsetTop +'px';
     //e.target.children[0].style.left  =  -editor.canvas_x  - editor.container.offsetLeft +'px';
     editor.editor_mode = "fixed";
+
+    const nodeEl = e.target.closest(".drawflow-node");
+    if (nodeEl) {
+      hydrateDataspaceOptions(nodeEl);
+    }
 
   }
 
@@ -826,6 +875,7 @@
   const ModuleTemplateGenerator = {
     generateHTML(module) {
       const fields = module.fields.map(field => this.generateField(field)).join('\n                ');
+      const actionBlock = this.generateActionBlock(module);
 
       return `
               <div>
@@ -834,31 +884,63 @@
                 </div>
                 <div class="box">
                   ${fields}
+                  ${actionBlock}
                 </div>
               </div>
               `;
     },
+    generateActionBlock(module) {
+      if (module.id === 'new_plan') {
+        return `
+          <div class="module-action-bar">
+            <button class="module-action-btn" type="button" onclick="submitNewPlan(event)">Create plan</button>
+            <div class="module-action-status" data-action-status></div>
+            <div class="module-action-result" data-action-result></div>
+          </div>
+        `;
+      }
+      if (module.id === 'new_meeting') {
+        return `
+          <div class="module-action-bar">
+            <button class="module-action-btn" type="button" onclick="submitNewMeeting(event)">Create meeting</button>
+            <div class="module-action-status" data-action-status></div>
+            <div class="module-action-result" data-action-result></div>
+          </div>
+        `;
+      }
+      if (module.id === 'plan_publish') {
+        return `
+          <div class="module-action-bar">
+            <button class="module-action-btn" type="button" onclick="submitWorkflowPlan(event)">Create plan</button>
+            <div class="module-action-status" data-action-status></div>
+            <div class="module-action-result" data-action-result></div>
+          </div>
+        `;
+      }
+      return '';
+    },
 
     generateField(field) {
       const requiredMark = field.required ? ' *' : '';
+      const defaultValue = field.defaultValue !== undefined ? field.defaultValue : '';
 
       switch (field.type) {
         case 'text':
         case 'url':
           return `<p>${field.label}${requiredMark}</p>
-                  <input type="${field.type}" df-${field.slug} placeholder="${field.placeholder || ''}">`;
+                  <input type="${field.type}" df-${field.slug} placeholder="${field.placeholder || ''}" value="${this.sanitize(defaultValue)}">`;
 
         case 'number':
           return `<p>${field.label}${requiredMark}</p>
-                  <input type="number" df-${field.slug} placeholder="${field.placeholder || ''}">`;
+                  <input type="number" df-${field.slug} placeholder="${field.placeholder || ''}" value="${this.sanitize(defaultValue)}">`;
 
         case 'textarea':
           return `<p>${field.label}${requiredMark}</p>
-                  <textarea df-${field.slug} placeholder="${field.placeholder || ''}"></textarea>`;
+                  <textarea df-${field.slug} placeholder="${field.placeholder || ''}">${this.sanitize(defaultValue)}</textarea>`;
 
         case 'select':
           const options = (field.options || []).map(opt =>
-            `<option value="${this.sanitize(opt)}">${opt}</option>`
+            `<option value="${this.sanitize(opt)}"${String(opt) === String(defaultValue) ? ' selected' : ''}>${opt}</option>`
           ).join('\n                  ');
           return `<p>${field.label}${requiredMark}</p>
                   <select df-${field.slug}>
@@ -867,9 +949,15 @@
 
         case 'checkbox':
           const checkboxId = `${field.slug}-checkbox`;
+          const isChecked = defaultValue === true || defaultValue === 'true';
           return `<p>${field.label}${requiredMark}</p>
-                  <input type="checkbox" df-${field.slug} id="${checkboxId}">
+                  <input type="checkbox" df-${field.slug} id="${checkboxId}"${isChecked ? ' checked' : ''}>
                   <label for="${checkboxId}">${field.placeholder || 'Enable'}</label>`;
+
+        case 'file':
+          const acceptAttr = field.accept ? ` accept="${field.accept}"` : '';
+          return `<p>${field.label}${requiredMark}</p>
+                  <input type="file" df-${field.slug}${acceptAttr}>`;
 
         default:
           return '';
@@ -889,6 +977,421 @@
       return String(text).replace(/[<>"']/g, '');
     }
   };
+
+  const DemocracyRoutesAPI = {
+    async listDataspaces() {
+      return apiRequest('/integrations/democracyroutes/dataspaces');
+    },
+
+    async listMeditationAudio() {
+      return apiRequest('/integrations/democracyroutes/meditation/audio');
+    },
+
+    async listUsers(dataspaceId) {
+      return apiRequest(`/integrations/democracyroutes/users?dataspace_id=${encodeURIComponent(dataspaceId)}`);
+    },
+
+    async createPlan(payload) {
+      return apiRequest('/integrations/democracyroutes/plans', { method: 'POST', body: payload });
+    },
+
+    async createMeeting(payload) {
+      return apiRequest('/integrations/democracyroutes/meetings', { method: 'POST', body: payload });
+    }
+  };
+
+  function getNodeIdFromEvent(event) {
+    const nodeEl = event.target.closest('.drawflow-node');
+    if (!nodeEl || !nodeEl.id) return null;
+    const raw = nodeEl.id.replace('node-', '');
+    return Number(raw);
+  }
+
+  function getNodeData(nodeId) {
+    if (!nodeId) return null;
+    return editor.getNodeFromId(nodeId);
+  }
+
+  function setNodeStatus(nodeEl, message, tone = 'info') {
+    const statusEl = nodeEl.querySelector('[data-action-status]');
+    if (!statusEl) return;
+    statusEl.textContent = message;
+    statusEl.dataset.tone = tone;
+  }
+
+  function setNodeResult(nodeEl, html) {
+    const resultEl = nodeEl.querySelector('[data-action-result]');
+    if (!resultEl) return;
+    resultEl.innerHTML = html || '';
+  }
+
+  function normalizeEmailList(raw) {
+    if (!raw) return [];
+    return raw
+      .split(/[\n,]/)
+      .map(value => value.trim().toLowerCase())
+      .filter(value => value.length > 0);
+  }
+
+  async function hydrateDataspaceOptions(nodeEl) {
+    const select = nodeEl.querySelector('select[df-dataspace-id]');
+    if (!select || select.dataset.loaded === 'true') return;
+    select.dataset.loaded = 'true';
+    try {
+      const response = await DemocracyRoutesAPI.listDataspaces();
+      const dataspaces = Array.isArray(response?.dataspaces) ? response.dataspaces : [];
+      const options = [
+        '<option value="">No dataspace</option>',
+        ...dataspaces.map(space => `<option value="${space.id}">${escapeHTML(space.name)}</option>`)
+      ];
+      select.innerHTML = options.join('');
+
+      const nodeId = Number(nodeEl.id?.replace('node-', ''));
+      const node = getNodeData(nodeId);
+      const selected = node?.data?.dataspace_id;
+      if (selected) {
+        select.value = selected;
+      }
+    } catch (error) {
+      select.innerHTML = '<option value="">Failed to load dataspaces</option>';
+    }
+  }
+
+  async function hydrateMeditationAudioOptions(nodeEl) {
+    const select = nodeEl.querySelector('select[df-meditation-audio-url]');
+    if (!select || select.dataset.loaded === 'true') return;
+    select.dataset.loaded = 'true';
+    try {
+      const response = await DemocracyRoutesAPI.listMeditationAudio();
+      const files = Array.isArray(response?.files) ? response.files : [];
+      const options = [
+        '<option value="">No audio</option>',
+        ...files.map(file =>
+          `<option value="${escapeHTML(file.url)}">${escapeHTML(file.name)}</option>`
+        )
+      ];
+      select.innerHTML = options.join('');
+
+      const nodeId = Number(nodeEl.id?.replace('node-', ''));
+      const node = getNodeData(nodeId);
+      const selected = node?.data?.meditation_audio_url;
+      if (selected) {
+        select.value = selected;
+      }
+    } catch (error) {
+      select.innerHTML = '<option value="">Failed to load audio</option>';
+    }
+  }
+
+  async function submitNewPlan(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const nodeId = getNodeIdFromEvent(event);
+    const node = getNodeData(nodeId);
+    if (!node) return;
+    const nodeEl = event.target.closest('.drawflow-node');
+    const data = node.data || {};
+
+    const title = String(data.title || '').trim();
+    const startDate = String(data.start_date || '').trim();
+    const startTime = String(data.start_time || '').trim();
+    const roundDuration = Number(data.round_duration_minutes || 0);
+    const roundsCount = Number(data.rounds_count || 0);
+    const syncMode = data.sync_mode || 'SERVER';
+    const maxParticipants = Number(data.max_participants_per_room || 2);
+    const dataspaceId = data.dataspace_id || null;
+    const createdByEmail = String(data.created_by_email || '').trim();
+    const participants = normalizeEmailList(data.participants);
+
+    if (!title || !startDate || !startTime || !roundDuration || !roundsCount || participants.length < 2) {
+      setNodeStatus(nodeEl, 'Fill title, date, time, durations, and at least 2 participants.', 'error');
+      return;
+    }
+
+    setNodeStatus(nodeEl, 'Creating plan…', 'info');
+    setNodeResult(nodeEl, '');
+
+    try {
+      const payload = {
+        title,
+        start_at: `${startDate}T${startTime}`,
+        round_duration_minutes: roundDuration,
+        rounds_count: roundsCount,
+        sync_mode: syncMode,
+        max_participants_per_room: maxParticipants,
+        dataspace_id: dataspaceId || null,
+        participants: participants.map(email => ({ type: 'email', value: email })),
+        created_by_email: createdByEmail || undefined
+      };
+
+      const result = await DemocracyRoutesAPI.createPlan(payload);
+      setNodeStatus(nodeEl, 'Plan created.', 'success');
+      if (result?.plan_url) {
+        setNodeResult(
+          nodeEl,
+          `<a href="${result.plan_url}" target="_blank" rel="noopener noreferrer">${result.plan_url}</a>
+           <button class="module-action-link" type="button" onclick="copyText('${result.plan_url}')">Copy link</button>`
+        );
+      }
+    } catch (error) {
+      setNodeStatus(nodeEl, error.message || 'Failed to create plan.', 'error');
+    }
+  }
+
+  async function submitNewMeeting(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const nodeId = getNodeIdFromEvent(event);
+    const node = getNodeData(nodeId);
+    if (!node) return;
+    const nodeEl = event.target.closest('.drawflow-node');
+    const data = node.data || {};
+
+    const title = String(data.title || '').trim();
+    const date = String(data.date || '').trim();
+    const startTime = String(data.start_time || '').trim();
+    const durationMinutes = data.duration_minutes ? Number(data.duration_minutes) : null;
+    const inviteEmails = normalizeEmailList(data.invite_emails);
+    const language = data.language || 'EN';
+    const transcriptionProvider = data.transcription_provider || 'DEEPGRAM';
+    const dataspaceId = data.dataspace_id || null;
+    const createdByEmail = String(data.created_by_email || '').trim();
+
+    if (!title) {
+      setNodeStatus(nodeEl, 'Title is required.', 'error');
+      return;
+    }
+
+    setNodeStatus(nodeEl, 'Creating meeting…', 'info');
+    setNodeResult(nodeEl, '');
+
+    try {
+      const payload = {
+        title,
+        date: date || undefined,
+        start_time: startTime || undefined,
+        duration_minutes: durationMinutes || undefined,
+        invite_emails: inviteEmails,
+        language,
+        transcription_provider: transcriptionProvider,
+        dataspace_id: dataspaceId || null,
+        created_by_email: createdByEmail || undefined
+      };
+
+      const result = await DemocracyRoutesAPI.createMeeting(payload);
+      setNodeStatus(nodeEl, 'Meeting created.', 'success');
+      if (result?.meeting_url) {
+        setNodeResult(
+          nodeEl,
+          `<a href="${result.meeting_url}" target="_blank" rel="noopener noreferrer">${result.meeting_url}</a>
+           <button class="module-action-link" type="button" onclick="copyText('${result.meeting_url}')">Copy link</button>`
+        );
+      }
+    } catch (error) {
+      setNodeStatus(nodeEl, error.message || 'Failed to create meeting.', 'error');
+    }
+  }
+
+  function getConnections(connectionsMap) {
+    if (!connectionsMap) return [];
+    return Object.values(connectionsMap).flatMap(entry =>
+      Array.isArray(entry.connections) ? entry.connections : []
+    );
+  }
+
+  function buildLinearChainFrom(nodeId) {
+    const chain = [];
+    const visited = new Set();
+    let currentId = nodeId;
+
+    while (currentId) {
+      if (visited.has(currentId)) {
+        return { error: 'Cycle detected in the flow.' };
+      }
+      visited.add(currentId);
+      chain.unshift(currentId);
+
+      const node = getNodeData(currentId);
+      if (!node) break;
+      const inputConnections = getConnections(node.inputs);
+      if (inputConnections.length === 0) break;
+      if (inputConnections.length > 1) {
+        return { error: 'Only linear flows are supported.' };
+      }
+      currentId = Number(inputConnections[0].node);
+    }
+
+    return { chain };
+  }
+
+  function validateLinearOutputs(chain) {
+    for (let index = 0; index < chain.length - 1; index += 1) {
+      const node = getNodeData(chain[index]);
+      if (!node) continue;
+      const outputConnections = getConnections(node.outputs);
+      if (outputConnections.length !== 1) {
+        return { error: 'Each step must connect to exactly one next step.' };
+      }
+    }
+    return { ok: true };
+  }
+
+  async function submitWorkflowPlan(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const nodeId = getNodeIdFromEvent(event);
+    const node = getNodeData(nodeId);
+    if (!node) return;
+    const nodeEl = event.target.closest('.drawflow-node');
+
+    setNodeStatus(nodeEl, 'Preparing plan…', 'info');
+    setNodeResult(nodeEl, '');
+
+    const chainResult = buildLinearChainFrom(nodeId);
+    if (chainResult.error) {
+      setNodeStatus(nodeEl, chainResult.error, 'error');
+      return;
+    }
+    const chain = chainResult.chain;
+    const outputCheck = validateLinearOutputs(chain);
+    if (outputCheck.error) {
+      setNodeStatus(nodeEl, outputCheck.error, 'error');
+      return;
+    }
+
+    const nodes = chain.map(getNodeData).filter(Boolean);
+    const settingsNode = nodes.find(item => item.name === 'plan_settings');
+    const participantsNode = nodes.find(item => item.name === 'plan_participants');
+
+    if (!settingsNode || !participantsNode) {
+      setNodeStatus(nodeEl, 'Add Plan Settings and Plan Participants modules.', 'error');
+      return;
+    }
+
+    const settings = settingsNode.data || {};
+    const participantsData = participantsNode.data || {};
+    const title = String(settings.title || '').trim();
+    const startDate = String(settings.start_date || '').trim();
+    const startTime = String(settings.start_time || '').trim();
+    const timezone = String(settings.timezone || '').trim();
+    const syncMode = settings.sync_mode || 'SERVER';
+    const maxParticipants = Number(settings.max_participants_per_room || 2);
+    const dataspaceId = settings.dataspace_id || null;
+    const language = settings.language || 'EN';
+    const transcriptionProvider = settings.transcription_provider || 'DEEPGRAM';
+    const defaultRoundMinutes = Number(settings.round_duration_minutes || 0);
+    const fallbackRoundsCount = Number(settings.rounds_count || 0);
+    const createdByEmail = String(participantsData.created_by_email || '').trim();
+    const participants = normalizeEmailList(participantsData.participants);
+
+    if (!title || !startDate || !startTime || participants.length < 2) {
+      setNodeStatus(nodeEl, 'Fill title, date, time, and at least 2 participants.', 'error');
+      return;
+    }
+
+    const blocks = [];
+    for (const item of nodes) {
+      const data = item.data || {};
+      if (item.name === 'plan_round') {
+        const minutes = Number(data.duration_minutes || defaultRoundMinutes || 0);
+        if (minutes > 0) {
+          blocks.push({ type: 'ROUND', duration_seconds: Math.round(minutes * 60) });
+        }
+      }
+      if (item.name === 'plan_pause') {
+        const minutes = Number(data.duration_minutes || 0);
+        if (minutes > 0) {
+          const audioUrl = String(data.meditation_audio_url || '').trim();
+          blocks.push({
+            type: 'MEDITATION',
+            duration_seconds: Math.round(minutes * 60),
+            meditation_audio_url: audioUrl || null
+          });
+        }
+      }
+      if (item.name === 'plan_prompt') {
+        const seconds = Number(data.duration_seconds || 0);
+        const posterTitle = String(data.poster_title || '').trim();
+        const posterContent = String(data.poster_content || '').trim();
+        if (!posterTitle || !posterContent) {
+          setNodeStatus(nodeEl, 'Prompt blocks need title and content.', 'error');
+          return;
+        }
+        if (seconds > 0) {
+          blocks.push({
+            type: 'POSTER',
+            duration_seconds: seconds,
+            poster_title: posterTitle,
+            poster_content: posterContent
+          });
+        }
+      }
+      if (item.name === 'plan_notes') {
+        const seconds = Number(data.duration_seconds || 0);
+        if (seconds > 0) {
+          blocks.push({ type: 'TEXT', duration_seconds: seconds });
+        }
+      }
+    }
+
+    const roundBlocks = blocks.filter(block => block.type === 'ROUND');
+    if (roundBlocks.length < 1 && fallbackRoundsCount > 0) {
+      for (let i = 0; i < fallbackRoundsCount; i += 1) {
+        const minutes = defaultRoundMinutes > 0 ? defaultRoundMinutes : 30;
+        blocks.push({ type: 'ROUND', duration_seconds: Math.round(minutes * 60) });
+      }
+    }
+
+    const roundBlocksFinal = blocks.filter(block => block.type === 'ROUND');
+    if (roundBlocksFinal.length < 1) {
+      setNodeStatus(nodeEl, 'Add at least one Round block.', 'error');
+      return;
+    }
+
+    const firstRoundSeconds = roundBlocksFinal[0]?.duration_seconds || 600;
+    const payload = {
+      title,
+      start_at: `${startDate}T${startTime}`,
+      round_duration_minutes: Math.max(1, Math.round(firstRoundSeconds / 60)),
+      rounds_count: roundBlocksFinal.length,
+      sync_mode: syncMode,
+      max_participants_per_room: maxParticipants,
+      timezone: timezone || null,
+      dataspace_id: dataspaceId || null,
+      language,
+      transcription_provider: transcriptionProvider,
+      participants: participants.map(email => ({ type: 'email', value: email })),
+      created_by_email: createdByEmail || undefined,
+      blocks
+    };
+
+    try {
+      setNodeStatus(nodeEl, 'Creating plan…', 'info');
+      const result = await DemocracyRoutesAPI.createPlan(payload);
+      setNodeStatus(nodeEl, 'Plan created.', 'success');
+      if (result?.plan_url) {
+        setNodeResult(
+          nodeEl,
+          `<a href="${result.plan_url}" target="_blank" rel="noopener noreferrer">${result.plan_url}</a>
+           <button class="module-action-link" type="button" onclick="copyText('${result.plan_url}')">Copy link</button>`
+        );
+      }
+    } catch (error) {
+      setNodeStatus(nodeEl, error.message || 'Failed to create plan.', 'error');
+    }
+  }
+
+  function copyText(text) {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      Swal.fire({
+        icon: 'success',
+        title: 'Copied',
+        timer: 1200,
+        showConfirmButton: false
+      });
+    });
+  }
 
   // Icon categories
   const ICON_LIST = [
@@ -1165,7 +1668,8 @@
         placeholder: '',
         required: false,
         options: [],
-        defaultValue: ''
+        defaultValue: '',
+        accept: ''
       };
 
       this.addFieldRow(field);
@@ -1180,6 +1684,7 @@
 
       const showOptions = field.type === 'select';
       const showPlaceholder = ['text', 'number', 'textarea', 'url', 'checkbox'].includes(field.type);
+      const showAccept = field.type === 'file';
 
       fieldDiv.innerHTML = `
         <div class="field-controls">
@@ -1191,15 +1696,19 @@
               <option value="select" ${field.type === 'select' ? 'selected' : ''}>Select</option>
               <option value="checkbox" ${field.type === 'checkbox' ? 'selected' : ''}>Checkbox</option>
               <option value="url" ${field.type === 'url' ? 'selected' : ''}>URL</option>
+              <option value="file" ${field.type === 'file' ? 'selected' : ''}>File</option>
             </select>
             <input type="text" class="field-label-input" placeholder="Label" value="${field.label || ''}">
             <input type="text" class="field-slug-input" placeholder="slug" value="${field.slug || ''}">
           </div>
-          <div class="field-row" style="display: ${showPlaceholder ? 'flex' : 'none'};">
+          <div class="field-row field-placeholder-row" style="display: ${showPlaceholder ? 'flex' : 'none'};">
             <input type="text" class="field-placeholder-input" placeholder="Placeholder / Checkbox label" value="${field.placeholder || ''}">
           </div>
-          <div class="field-row" style="display: ${showOptions ? 'flex' : 'none'};">
+          <div class="field-row field-options-row" style="display: ${showOptions ? 'flex' : 'none'};">
             <input type="text" class="field-options-input" placeholder="Options (comma-separated)" value="${(field.options || []).join(', ')}">
+          </div>
+          <div class="field-row field-accept-row" style="display: ${showAccept ? 'flex' : 'none'};">
+            <input type="text" class="field-accept-input" placeholder="Accepted types (e.g. audio/*,video/*)" value="${field.accept || ''}">
           </div>
           <div class="field-row">
             <label style="margin: 0;">
@@ -1225,14 +1734,17 @@
       const row = selectEl.closest('.field-editor-row');
       const type = selectEl.value;
 
-      const placeholderRow = row.querySelectorAll('.field-row')[1];
-      const optionsRow = row.querySelectorAll('.field-row')[2];
-
       const showPlaceholder = ['text', 'number', 'textarea', 'url', 'checkbox'].includes(type);
       const showOptions = type === 'select';
+      const showAccept = type === 'file';
 
-      placeholderRow.style.display = showPlaceholder ? 'flex' : 'none';
-      optionsRow.style.display = showOptions ? 'flex' : 'none';
+      const placeholderRow = row.querySelector('.field-placeholder-row');
+      const optionsRow = row.querySelector('.field-options-row');
+      const acceptRow = row.querySelector('.field-accept-row');
+
+      if (placeholderRow) placeholderRow.style.display = showPlaceholder ? 'flex' : 'none';
+      if (optionsRow) optionsRow.style.display = showOptions ? 'flex' : 'none';
+      if (acceptRow) acceptRow.style.display = showAccept ? 'flex' : 'none';
 
       this.updatePreview();
     },
@@ -1256,6 +1768,7 @@
         const slug = row.querySelector('.field-slug-input').value.trim() ||
                       label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         const placeholder = row.querySelector('.field-placeholder-input')?.value.trim() || '';
+        const accept = row.querySelector('.field-accept-input')?.value.trim() || '';
         const required = row.querySelector('.field-required-check').checked;
         const optionsInput = row.querySelector('.field-options-input')?.value || '';
         const options = type === 'select' ? optionsInput.split(',').map(s => s.trim()).filter(s => s) : [];
@@ -1269,7 +1782,8 @@
             placeholder,
             required,
             options,
-            defaultValue: ''
+            defaultValue: '',
+            accept
           });
         }
       });

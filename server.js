@@ -11,6 +11,8 @@ fs.mkdirSync(dbDir, { recursive: true });
 const dbPath = path.join(dbDir, 'democracy_routes.db');
 
 const db = new sqlite3.Database(dbPath);
+const DEMOCRACYROUTES_BASE_URL = process.env.DEMOCRACYROUTES_BASE_URL || 'http://localhost:3015';
+const DEMOCRACYROUTES_API_KEY = process.env.DEMOCRACYROUTES_API_KEY || '';
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(__dirname));
@@ -231,6 +233,37 @@ function seedBuiltInModules() {
       ]
     },
     {
+      id: 'media',
+      name: 'Media',
+      icon: 'fa-video',
+      inputs: 1,
+      outputs: 1,
+      type: 'builtin',
+      fields: [
+        {
+          id: 'media-file',
+          type: 'file',
+          label: 'Media File',
+          slug: 'media-file',
+          accept: 'audio/*,video/*'
+        },
+        {
+          id: 'media-url',
+          type: 'url',
+          label: 'Media URL',
+          slug: 'media-url',
+          placeholder: 'https://example.com/media.mp4'
+        },
+        {
+          id: 'media-info',
+          type: 'textarea',
+          label: 'Info',
+          slug: 'media-info',
+          placeholder: 'Enter additional information'
+        }
+      ]
+    },
+    {
       id: 'conflict_resolution',
       name: 'Conflict Resolution',
       icon: 'fa-handshake',
@@ -289,6 +322,398 @@ function seedBuiltInModules() {
           label: 'Multilanguage',
           slug: 'multilanguage',
           options: ['English (EN)', 'Spanish (ES)', 'French (FR)', 'German (DE)', 'Italian (IT)']
+        }
+      ]
+    },
+    {
+      id: 'plan_settings',
+      name: 'Plan Settings',
+      icon: 'fa-sliders-h',
+      inputs: 1,
+      outputs: 1,
+      type: 'builtin',
+      fields: [
+        {
+          id: 'plan-title',
+          type: 'text',
+          label: 'Title',
+          slug: 'title',
+          placeholder: 'Plan title',
+          required: true
+        },
+        {
+          id: 'plan-start-date',
+          type: 'text',
+          label: 'Start date',
+          slug: 'start-date',
+          placeholder: 'YYYY-MM-DD',
+          required: true
+        },
+        {
+          id: 'plan-start-time',
+          type: 'text',
+          label: 'Start time',
+          slug: 'start-time',
+          placeholder: 'HH:MM',
+          required: true
+        },
+        {
+          id: 'plan-timezone',
+          type: 'text',
+          label: 'Timezone',
+          slug: 'timezone',
+          placeholder: 'Europe/Rome'
+        },
+        {
+          id: 'plan-round-duration',
+          type: 'number',
+          label: 'Default round duration (min)',
+          slug: 'round-duration-minutes',
+          placeholder: '60',
+          defaultValue: '60'
+        },
+        {
+          id: 'plan-rounds-count',
+          type: 'number',
+          label: 'Fallback rounds count',
+          slug: 'rounds-count',
+          placeholder: '1',
+          defaultValue: '1'
+        },
+        {
+          id: 'plan-sync-mode',
+          type: 'select',
+          label: 'Sync mode',
+          slug: 'sync-mode',
+          options: ['SERVER', 'CLIENT'],
+          defaultValue: 'SERVER'
+        },
+        {
+          id: 'plan-max-participants',
+          type: 'number',
+          label: 'Max participants per room',
+          slug: 'max-participants-per-room',
+          placeholder: '2',
+          defaultValue: '2'
+        },
+        {
+          id: 'plan-language',
+          type: 'select',
+          label: 'Language',
+          slug: 'language',
+          options: ['EN', 'IT'],
+          defaultValue: 'EN'
+        },
+        {
+          id: 'plan-transcription-provider',
+          type: 'select',
+          label: 'Transcription provider',
+          slug: 'transcription-provider',
+          options: ['DEEPGRAM', 'DEEPGRAMLIVE', 'VOSK'],
+          defaultValue: 'DEEPGRAM'
+        },
+        {
+          id: 'plan-dataspace',
+          type: 'select',
+          label: 'Dataspace',
+          slug: 'dataspace-id',
+          options: ['Loading...']
+        }
+      ]
+    },
+    {
+      id: 'plan_participants',
+      name: 'Plan Participants',
+      icon: 'fa-users',
+      inputs: 1,
+      outputs: 1,
+      type: 'builtin',
+      fields: [
+        {
+          id: 'plan-participants',
+          type: 'textarea',
+          label: 'Participants (emails)',
+          slug: 'participants',
+          placeholder: 'one per line',
+          required: true
+        },
+        {
+          id: 'plan-created-by',
+          type: 'text',
+          label: 'Created by (email)',
+          slug: 'created-by-email',
+          placeholder: 'admin@example.com'
+        }
+      ]
+    },
+    {
+      id: 'plan_round',
+      name: 'Round Block',
+      icon: 'fa-sync-alt',
+      inputs: 1,
+      outputs: 1,
+      type: 'builtin',
+      fields: [
+        {
+          id: 'plan-round-duration',
+          type: 'number',
+          label: 'Duration (min)',
+          slug: 'duration-minutes',
+          placeholder: '30',
+          defaultValue: '30'
+        }
+      ]
+    },
+    {
+      id: 'plan_pause',
+      name: 'Pause Block',
+      icon: 'fa-moon',
+      inputs: 1,
+      outputs: 1,
+      type: 'builtin',
+      fields: [
+        {
+          id: 'plan-pause-duration',
+          type: 'number',
+          label: 'Duration (min)',
+          slug: 'duration-minutes',
+          placeholder: '5',
+          defaultValue: '5'
+        },
+        {
+          id: 'plan-pause-audio',
+          type: 'select',
+          label: 'Meditation audio',
+          slug: 'meditation-audio-url',
+          options: ['Loading...']
+        }
+      ]
+    },
+    {
+      id: 'plan_prompt',
+      name: 'Prompt Block',
+      icon: 'fa-sticky-note',
+      inputs: 1,
+      outputs: 1,
+      type: 'builtin',
+      fields: [
+        {
+          id: 'plan-prompt-title',
+          type: 'text',
+          label: 'Title',
+          slug: 'poster-title',
+          placeholder: 'Prompt title',
+          required: true
+        },
+        {
+          id: 'plan-prompt-content',
+          type: 'textarea',
+          label: 'Content',
+          slug: 'poster-content',
+          placeholder: 'Prompt content',
+          required: true
+        },
+        {
+          id: 'plan-prompt-duration',
+          type: 'number',
+          label: 'Duration (sec)',
+          slug: 'duration-seconds',
+          placeholder: '10',
+          defaultValue: '10'
+        }
+      ]
+    },
+    {
+      id: 'plan_notes',
+      name: 'Notes Block',
+      icon: 'fa-edit',
+      inputs: 1,
+      outputs: 1,
+      type: 'builtin',
+      fields: [
+        {
+          id: 'plan-notes-duration',
+          type: 'number',
+          label: 'Duration (sec)',
+          slug: 'duration-seconds',
+          placeholder: '30',
+          defaultValue: '30'
+        }
+      ]
+    },
+    {
+      id: 'plan_publish',
+      name: 'Publish Plan',
+      icon: 'fa-paper-plane',
+      inputs: 1,
+      outputs: 0,
+      type: 'builtin',
+      fields: []
+    },
+    {
+      id: 'new_plan',
+      name: 'New Plan',
+      icon: 'fa-calendar-check',
+      inputs: 1,
+      outputs: 1,
+      type: 'builtin',
+      fields: [
+        {
+          id: 'plan-title',
+          type: 'text',
+          label: 'Title',
+          slug: 'title',
+          placeholder: 'Plan title',
+          required: true
+        },
+        {
+          id: 'plan-start-date',
+          type: 'text',
+          label: 'Start date',
+          slug: 'start-date',
+          placeholder: 'YYYY-MM-DD',
+          required: true
+        },
+        {
+          id: 'plan-start-time',
+          type: 'text',
+          label: 'Start time',
+          slug: 'start-time',
+          placeholder: 'HH:MM',
+          required: true
+        },
+        {
+          id: 'plan-round-duration',
+          type: 'number',
+          label: 'Round duration (min)',
+          slug: 'round-duration-minutes',
+          placeholder: '60',
+          defaultValue: '60',
+          required: true
+        },
+        {
+          id: 'plan-rounds-count',
+          type: 'number',
+          label: 'Rounds count',
+          slug: 'rounds-count',
+          placeholder: '6',
+          defaultValue: '6',
+          required: true
+        },
+        {
+          id: 'plan-sync-mode',
+          type: 'select',
+          label: 'Sync mode',
+          slug: 'sync-mode',
+          options: ['SERVER', 'CLIENT'],
+          defaultValue: 'SERVER'
+        },
+        {
+          id: 'plan-max-participants',
+          type: 'number',
+          label: 'Max participants per room',
+          slug: 'max-participants-per-room',
+          placeholder: '2',
+          defaultValue: '2'
+        },
+        {
+          id: 'plan-dataspace',
+          type: 'select',
+          label: 'Dataspace',
+          slug: 'dataspace-id',
+          options: ['Loading...']
+        },
+        {
+          id: 'plan-participants',
+          type: 'textarea',
+          label: 'Participants (emails)',
+          slug: 'participants',
+          placeholder: 'one per line',
+          required: true
+        },
+        {
+          id: 'plan-created-by',
+          type: 'text',
+          label: 'Created by (email)',
+          slug: 'created-by-email',
+          placeholder: 'admin@example.com'
+        }
+      ]
+    },
+    {
+      id: 'new_meeting',
+      name: 'New Meeting',
+      icon: 'fa-video',
+      inputs: 1,
+      outputs: 1,
+      type: 'builtin',
+      fields: [
+        {
+          id: 'meeting-title',
+          type: 'text',
+          label: 'Title',
+          slug: 'title',
+          placeholder: 'Meeting title',
+          required: true
+        },
+        {
+          id: 'meeting-date',
+          type: 'text',
+          label: 'Date',
+          slug: 'date',
+          placeholder: 'YYYY-MM-DD'
+        },
+        {
+          id: 'meeting-start-time',
+          type: 'text',
+          label: 'Start time',
+          slug: 'start-time',
+          placeholder: 'HH:MM'
+        },
+        {
+          id: 'meeting-duration',
+          type: 'number',
+          label: 'Duration (min)',
+          slug: 'duration-minutes',
+          placeholder: '60',
+          defaultValue: '60'
+        },
+        {
+          id: 'meeting-language',
+          type: 'select',
+          label: 'Language',
+          slug: 'language',
+          options: ['EN', 'IT'],
+          defaultValue: 'EN'
+        },
+        {
+          id: 'meeting-transcription',
+          type: 'select',
+          label: 'Transcription provider',
+          slug: 'transcription-provider',
+          options: ['DEEPGRAM', 'VOSK'],
+          defaultValue: 'DEEPGRAM'
+        },
+        {
+          id: 'meeting-dataspace',
+          type: 'select',
+          label: 'Dataspace',
+          slug: 'dataspace-id',
+          options: ['Loading...']
+        },
+        {
+          id: 'meeting-invites',
+          type: 'textarea',
+          label: 'Invite emails',
+          slug: 'invite-emails',
+          placeholder: 'one per line'
+        },
+        {
+          id: 'meeting-created-by',
+          type: 'text',
+          label: 'Created by (email)',
+          slug: 'created-by-email',
+          placeholder: 'admin@example.com'
         }
       ]
     },
@@ -526,6 +951,93 @@ app.post('/api/modules/import', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Failed to import modules');
+  }
+});
+
+async function fetchDemocracyRoutes(path, options = {}) {
+  if (!DEMOCRACYROUTES_API_KEY) {
+    return { ok: false, status: 500, payload: { error: 'DEMOCRACYROUTES_API_KEY is not set' } };
+  }
+
+  const response = await fetch(`${DEMOCRACYROUTES_BASE_URL}${path}`, {
+    method: options.method || 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': DEMOCRACYROUTES_API_KEY,
+      ...(options.headers || {})
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined
+  });
+
+  const text = await response.text();
+  let payload = null;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch (error) {
+    payload = { error: text || 'Unexpected response' };
+  }
+
+  return { ok: response.ok, status: response.status, payload };
+}
+
+app.get('/api/integrations/democracyroutes/dataspaces', async (req, res) => {
+  try {
+    const result = await fetchDemocracyRoutes('/api/integrations/workflow/dataspaces');
+    res.status(result.status).json(result.payload);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Failed to load dataspaces');
+  }
+});
+
+app.get('/api/integrations/democracyroutes/meditation/audio', async (req, res) => {
+  try {
+    const result = await fetchDemocracyRoutes('/api/integrations/workflow/meditation/audio');
+    res.status(result.status).json(result.payload);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Failed to load meditation audio');
+  }
+});
+
+app.get('/api/integrations/democracyroutes/users', async (req, res) => {
+  try {
+    const dataspaceId = req.query.dataspace_id;
+    if (!dataspaceId) {
+      res.status(400).json({ error: 'dataspace_id is required' });
+      return;
+    }
+    const result = await fetchDemocracyRoutes(`/api/integrations/workflow/users?dataspace_id=${encodeURIComponent(dataspaceId)}`);
+    res.status(result.status).json(result.payload);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Failed to load dataspace users');
+  }
+});
+
+app.post('/api/integrations/democracyroutes/plans', async (req, res) => {
+  try {
+    const result = await fetchDemocracyRoutes('/api/integrations/workflow/plans', {
+      method: 'POST',
+      body: req.body || {}
+    });
+    res.status(result.status).json(result.payload);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Failed to create plan');
+  }
+});
+
+app.post('/api/integrations/democracyroutes/meetings', async (req, res) => {
+  try {
+    const result = await fetchDemocracyRoutes('/api/integrations/workflow/meetings', {
+      method: 'POST',
+      body: req.body || {}
+    });
+    res.status(result.status).json(result.payload);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Failed to create meeting');
   }
 });
 
